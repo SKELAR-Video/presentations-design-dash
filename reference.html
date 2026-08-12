@@ -1,0 +1,232 @@
+<meta charset="utf-8"><title>SKELAR — еталон слайдів з даними</title>
+<style>
+html{background:#05070E} body{margin:0} .stage{zoom:0.62}
+:root{
+ --ink0:#0F131D;   /* фон слайда */
+ --ink1:#1C202B;   /* картка-контейнер */
+ --ink2:#292D39;   /* шапка, піднята поверхня */
+ --ink3:#343945;   /* доріжка смуги, чипи */
+ --line:#414653;   /* розділювачі */
+ --dim:#6E737F;    /* третій рівень тексту */
+ --mut:#A2A6B1;    /* другий рівень тексту */
+ --txt:#FFFFFF;
+ --bar:#545966;    /* нейтральна серія */
+ --accent:#FD3433; /* бренд, не оцінка */
+ --ok:#B2E5CF;     /* врегульовано */
+ --warn:#F3DAB2;   /* умовно або не врегульовано */
+}
+.slide{width:1920px;height:1080px;box-sizing:border-box;padding:100px;margin:0 auto 40px;
+ background:var(--ink0);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:52px;
+ font-family:Inter,"Inter Variable",system-ui,sans-serif;font-weight:500;font-variation-settings:'wght' 500;
+ font-synthesis:none;color:var(--txt);line-height:1.19;-webkit-font-smoothing:antialiased}
+.logo{position:absolute;left:1730px;top:100px;width:90px;height:90px;background:var(--ink2)}
+.h1{width:1610px;font-size:88px;line-height:1.15;margin:0}
+
+.slide.data .sub{font-size:24px;margin-top:6px}
+.sub{font-size:32px;color:var(--mut);margin:10px 0 0}
+.note{position:absolute;left:100px;right:100px;top:980px;height:100px;margin:0;
+ display:flex;align-items:center;gap:40px;font-size:19px;color:var(--dim)}
+.lg{display:flex;gap:32px;align-items:center}
+.lg span{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.mk{width:16px;height:16px;border-radius:50%;background:var(--txt);flex:none}
+.swatch{width:26px;height:9px;border-radius:5px;flex:none}
+.m1{background:#FFFFFF}
+.m2{background:#888C98}
+.m3{background:#545966}
+
+/* ── картка-таблиця, за зразком Purchase Order ─────────────────────────── */
+.panel{flex:1 1 auto;min-height:0;background:var(--ink1);border-radius:28px;
+ display:flex;flex-direction:column;overflow:hidden}
+.thead{background:var(--ink2);padding:20px 32px;border-radius:0 0 20px 20px}
+.tbody{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:0 32px 28px}
+.r{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1.55fr) minmax(0,1.25fr) minmax(0,1.25fr) minmax(0,.85fr) minmax(0,1.1fr) minmax(0,1.5fr) minmax(0,1.75fr);
+ gap:22px;align-items:start;padding:var(--rp,5px) 0;flex:1 0 auto;border-top:1px solid var(--line)}
+.thead .r{border-top:none;padding:0;font-size:18px;color:var(--mut)}
+.tbody .r:first-child{border-top:none}
+.r > *{font-size:var(--c,19px)}
+.nm{display:flex;align-items:flex-start;gap:14px}
+.thead .r > *{align-self:start}
+.nm i{margin-top:9px;flex:none}
+.nm em{font-style:normal;display:block;font-size:15px;color:var(--dim);margin-top:1px}
+.nm b{font-weight:500}
+.mut{color:var(--mut)}
+.num{text-align:right;color:var(--txt);font-variant-numeric:tabular-nums}
+.thead .num{color:var(--mut)}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .none{color:var(--dim)}
+.hi{background:var(--ink2)}
+.hi td, .hi > *{}
+
+/* ── рейтинг зі смугами ───────────────────────────────────────────────── */
+.cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.col{background:var(--ink1);border-radius:28px;display:flex;flex-direction:column;overflow:hidden}
+.col-h{background:var(--ink2);padding:22px 28px;border-radius:0 0 20px 20px}
+.col-h b{display:block;font-weight:500;font-size:26px;letter-spacing:.04em}
+.col-h span{font-size:21px;color:var(--dim)}
+.col-b{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:6px 28px 30px}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) 96px 78px;gap:12px;align-items:center;
+ padding:var(--lp,3px) 0;flex:1 0 auto;min-height:var(--lh,44px);border-top:1px solid var(--line)}
+.ln:first-child{border-top:none}
+.ln .t{font-size:var(--l,20px);line-height:1.15;white-space:nowrap}
+.ln .t span{display:block;font-size:17px;margin-top:1px;color:var(--dim)}
+.tr2{height:9px;border-radius:5px;background:var(--ink3)}
+.tr2 i{display:block;height:100%;border-radius:5px;background:var(--bar)}
+.v{text-align:right;font-size:calc(var(--l,20px) + 4px);font-variant-numeric:tabular-nums}
+.v em{font-style:normal;color:var(--dim)}
+
+/* ── додатково для дашбордів і KPI ─────────────────────────────── */
+
+html{background:#05070E} body{margin:0} .stage{zoom:0.62}
+:root{
+ --ink0:#0F131D;   /* фон слайда */
+ --ink1:#1C202B;   /* картка-контейнер */
+ --ink2:#292D39;   /* шапка, піднята поверхня */
+ --ink3:#343945;   /* доріжка смуги, чипи */
+ --line:#414653;   /* розділювачі */
+ --dim:#6E737F;    /* третій рівень тексту */
+ --mut:#A2A6B1;    /* другий рівень тексту */
+ --txt:#FFFFFF;
+ --bar:#545966;    /* нейтральна серія */
+ --accent:#FD3433; /* бренд, не оцінка */
+ --ok:#B2E5CF;     /* врегульовано */
+ --warn:#F3DAB2;   /* умовно або не врегульовано */
+}
+.slide{width:1920px;height:1080px;box-sizing:border-box;padding:100px;margin:0 auto 40px;
+ background:var(--ink0);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:52px;
+ font-family:Inter,"Inter Variable",system-ui,sans-serif;font-weight:500;font-variation-settings:'wght' 500;
+ font-synthesis:none;color:var(--txt);line-height:1.19;-webkit-font-smoothing:antialiased}
+.logo{position:absolute;left:1730px;top:100px;width:90px;height:90px;background:var(--ink2)}
+.h1{width:1610px;font-size:88px;line-height:1.15;margin:0}
+.slide.data{--h1:44px;--logo:none;--tw:1720px}
+.slide.data .logo{display:var(--logo)}
+.slide.data .h1{font-size:var(--h1);width:var(--tw)}
+.slide.data .sub{font-size:24px;margin-top:6px}
+.sub{font-size:32px;color:var(--mut);margin:10px 0 0}
+.note{position:absolute;left:100px;right:100px;top:980px;height:100px;margin:0;
+ display:flex;align-items:center;gap:40px;font-size:19px;color:var(--dim)}
+.lg{display:flex;gap:32px;align-items:center}
+.lg span{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.mk{width:16px;height:16px;border-radius:50%;background:var(--txt);flex:none}
+.swatch{width:26px;height:9px;border-radius:5px;flex:none}
+.m1{background:#FFFFFF}
+.m2{background:#888C98}
+.m3{background:#545966}
+
+/* ── картка-таблиця, за зразком Purchase Order ─────────────────────────── */
+.panel{flex:1 1 auto;min-height:0;background:var(--ink1);border-radius:28px;
+ display:flex;flex-direction:column;overflow:hidden}
+.thead{background:var(--ink2);padding:22px 30px;border-radius:0 0 20px 20px}
+.tbody{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:0 32px 28px}
+.r{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1.55fr) minmax(0,1.25fr) minmax(0,1.25fr) minmax(0,.85fr) minmax(0,1.1fr) minmax(0,1.5fr) minmax(0,1.75fr);
+ gap:22px;align-items:start;padding:var(--rp,5px) 0;flex:1 0 auto;border-top:1px solid var(--line)}
+.thead .r{border-top:none;padding:0;font-size:18px;color:var(--mut)}
+.tbody .r:first-child{border-top:none}
+.r > *{font-size:var(--c,19px)}
+.nm{display:flex;align-items:flex-start;gap:14px}
+.thead .r > *{align-self:start}
+.nm i{margin-top:9px;flex:none}
+.nm em{font-style:normal;display:block;font-size:15px;color:var(--dim);margin-top:1px}
+.nm b{font-weight:500}
+.mut{color:var(--mut)}
+.num{text-align:right;color:var(--txt);font-variant-numeric:tabular-nums}
+.thead .num{color:var(--mut)}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .none{color:var(--dim)}
+.hi{background:var(--ink2)}
+.hi td, .hi > *{}
+
+/* ── рейтинг зі смугами ───────────────────────────────────────────────── */
+.cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.col{background:var(--ink1);border-radius:28px;display:flex;flex-direction:column;overflow:hidden}
+.col-h{background:var(--ink2);padding:22px 28px;border-radius:0 0 20px 20px}
+.col-h b{display:block;font-weight:500;font-size:26px;letter-spacing:.04em}
+.col-h span{font-size:21px;color:var(--dim)}
+.col-b{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:6px 28px 30px}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) 96px 78px;gap:12px;align-items:center;
+ padding:var(--lp,3px) 0;flex:1 0 auto;min-height:var(--lh,44px);border-top:1px solid var(--line)}
+.ln:first-child{border-top:none}
+.ln .t{font-size:var(--l,20px);line-height:1.15;white-space:nowrap}
+.ln .t span{display:block;font-size:17px;margin-top:1px;color:var(--dim)}
+.tr2{height:9px;border-radius:5px;background:var(--ink3)}
+.tr2 i{display:block;height:100%;border-radius:5px;background:var(--bar)}
+.v{text-align:right;font-size:calc(var(--l,20px) + 4px);font-variant-numeric:tabular-nums}
+.v em{font-style:normal;color:var(--dim)}
+
+/* KPI-смуга */
+.kpis{display:grid;gap:30px}
+.k2{grid-template-columns:1fr 1.25fr}
+.k4{grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;flex:1 1 auto;min-height:0}
+.kpi.top{justify-content:flex-start;align-items:flex-start;text-align:left;gap:12px}
+.kpi{background:var(--ink1);border-radius:22px;padding:30px;display:flex;flex-direction:column;
+ justify-content:center;gap:8px;min-height:0;overflow:hidden}
+.kpi.row{flex-direction:row;align-items:baseline;gap:18px;justify-content:flex-start}
+.kv2{font-size:44px;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kv2.two-line{white-space:normal;font-size:44px;line-height:1.15}
+.kl{font-size:21px;color:var(--mut)}
+.kx{font-size:18px;color:var(--dim);margin-top:2px}
+.kx b{font-weight:500;color:var(--ok)} .kx s{text-decoration:none;color:var(--warn)}
+.k4 .kv2{font-size:72px}
+.k4 .kv2.sm{font-size:52px}
+.k4 .kl{font-size:22px}
+.k4 .kx{font-size:19px}
+
+/* дві таблиці поруч */
+.two{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1fr 1.25fr;gap:30px}
+.tcol{display:flex;flex-direction:column;min-height:0;gap:14px}
+.lbl{font-size:22px;color:var(--txt)}
+.tw{flex:1 1 auto;min-height:0;background:var(--ink1);border-radius:26px;display:flex;flex-direction:column;overflow:hidden}
+.tw .thead{border-radius:0 0 18px 18px;padding:0 30px}
+.tw .thead .r{padding:16px 0;border-top:none}
+.tw .tbody{padding:0 30px 18px}
+.cap{font-size:22px;color:var(--txt)}
+.g3{grid-template-columns:minmax(0,1.6fr) minmax(0,.9fr) minmax(0,.9fr)}
+.g4{grid-template-columns:minmax(0,1.7fr) minmax(0,.8fr) minmax(0,.8fr) minmax(0,.8fr)}
+
+/* графік-рейтинг */
+.chart{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1.45fr 1fr;gap:36px}
+.cbox{background:var(--ink1);border-radius:26px;display:flex;flex-direction:column;overflow:hidden}
+.cbody{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:8px 30px 18px}
+.crow{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr) 78px;gap:16px;align-items:center;
+ flex:1 0 auto;padding:5px 0;font-size:20px}
+.crow > div:first-child{white-space:nowrap;overflow:hidden}
+.crow .b{height:16px;border-radius:8px;background:var(--ink3)}
+.crow .b i{display:block;height:100%;border-radius:8px;background:var(--bar)}
+.crow .b i.hi{background:var(--accent)}
+.crow .n{text-align:right;font-variant-numeric:tabular-nums}
+.says{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:0 30px}
+.say{flex:1 0 auto;display:flex;align-items:center;font-size:23px;color:var(--mut);line-height:1.3;
+ padding:10px 0;border-top:1px solid var(--line)}
+.say:first-child{border-top:none}
+.say b{font-weight:500;color:var(--txt)}
+.say.sum{color:var(--dim);font-size:21px}
+
+.cbox{flex:1 1 auto;min-height:0}
+.cbody{padding:18px 30px}
+.says{padding:8px 30px}
+</style>
+<div class="stage"><section class="slide data" style="--h1:56px;--logo:none;--tw:1720px"><div class="logo"></div>
+<div><h1 class="h1">Карта відкритих конкурсів для учасників усіх рівнів та команд</h1></div>
+<div class="panel"><div class="thead"><div class="r"><div>Конкурс</div><div>Хто може брати участь / обмеження</div><div>Остання подія</div><div>Наступна подія</div><div class="num">Учасники (остання)</div><div>Приз орг-ра</div><div>Виплата за призове</div><div>Хто оплачує участь</div></div></div><div class="tbody"><div class="r"><div class="nm"><i class="mk m1"></i><div><b>AL-1</b><em>Олімпіада, напрям Альфа</em></div></div><div class="mut">Учасники до 20 р. · макс. 6 від країни</div><div class="mut">10–20 лип 2025 · Місто Альфа, AA</div><div>10–21 лип 2026 · Місто Бета, BB</div><div class="num">630 / 110 кр.</div><div class="mut">— медалі</div><div class="ok">100k умовних (призер) · 25k/міс (учасник) · Фонд A / Орган B</div><div class="mut">Спонсор Alpha (Principal) · Спонсор Beta (підготовка)</div></div><div class="r"><div class="nm"><i class="mk m1"></i><div><b>AL-2</b><em>Олімпіада, напрям Бета</em></div></div><div class="mut">Учасники до 20 р. · макс. 4 від країни</div><div class="mut">вер 2025 · Місто Гамма, CC</div><div>9–16 серп 2026 · Місто Дельта, DD</div><div class="num">~350 / 87 кр.</div><div class="mut">— медалі</div><div class="ok">100k умовних (призер) · 25k/міс (учасник) · Фонд A / Орган B</div><div class="mut">Спонсор Gamma, Delta · Спонсор Eta, Theta</div></div><div class="r"><div class="nm"><i class="mk m2"></i><div><b>TC-3</b><em>Командний контест**</em></div></div><div class="mut">Учасники з організацій · команди по 3</div><div class="mut">4 вер 2025 · Місто Епсилон, EE</div><div>15–20 лист 2026 · Місто Зета, FF</div><div class="num">63 294 / 93 кр. · фінал: 140 ком.</div><div class="mut">$15–30k (спонс.)</div><div class="warn">— (командний конкурс) · організація або сам учасник</div><div class="mut">Спонсор Iota (Diamond) · Спонсор Kappa (Global) · Спонсор Mu (регіонали)</div></div><div class="r"><div class="nm"><i class="mk m1"></i><div><b>AL-4</b><em>Олімпіада, напрям Гамма</em></div></div><div class="mut">Учасники до 20 р. · макс. 5 від країни · відбір через центр</div><div class="mut">17–25 лип 2025 · Місто Ета, GG</div><div>4–12 лип 2026 · Регіон Тета</div><div class="num">~630 / 110+ кр.</div><div class="mut">— медалі</div><div class="ok">100k умовних (призер) · Фонд A / Орган B</div><div class="mut">Хост-регіон (змінні щороку)</div></div><div class="r"><div class="nm"><i class="mk m1"></i><div><b>AL-5</b><em>Олімпіада, напрям Дельта</em></div></div><div class="mut">Учасники до 18 р. · макс. 3 від країни · відбір нац.</div><div class="mut">20–29 лип 2025 · Місто Йота, HH</div><div>12–20 лип 2026 · Місто Каппа, II</div><div class="num">~300 / 60+ кр.</div><div class="mut">— медалі</div><div class="ok">100k умовних (якщо в переліку) · Фонд A / Орган B</div><div class="mut">Хост-регіон (змінні щороку)</div></div><div class="r"><div class="nm"><i class="mk m1"></i><div><b>AL-6</b><em>Олімпіада, напрям Епсилон*</em></div></div><div class="mut">Учасники до 20 р. · макс. 4 від країни</div><div class="mut">серп 2025 · Місто Лямбда, JJ</div><div>2–8 серп 2026 · Місто Мю, KK</div><div class="num">300 / 61 кр. (103 у 2026)</div><div class="mut">— медалі · призовий пул не вказано</div><div class="warn">Поза загальним переліком (tbc) · не врегул.</div><div class="mut">Спонсор Nu, Xi · Спонсор Omicron, Pi · Спонсор Rho (local)</div></div><div class="r"><div class="nm"><i class="mk m3"></i><div><b>Онлайн-кап</b><em>Алгоритмічний конкурс***</em></div></div><div class="mut">18+, будь-хто з акаунтом платформи · без нац. відбору</div><div class="mut">вер–груд 2024 · онлайн</div><div>вер–груд 2025 · онлайн</div><div class="num">~20k · фінал: 25</div><div class="mut">$20k (1 місце)</div><div class="none">— (відкр.) · — (онлайн)</div><div class="mut">Платформа Sigma (організатор)</div></div><div class="r"><div class="nm"><i class="mk m3"></i><div><b>Відкриті майданчики</b><em>Онлайн-платформи</em></div></div><div class="mut">Будь-хто, будь-який вік · онлайн, без відбору · рівень Expert+</div><div class="mut">Rolling (постійно)</div><div>Rolling (сезон 2026)</div><div class="num">23M+ акаунтів (сумарно)</div><div class="mut">$1M+ (сезон 2026)</div><div class="none">— · — (онлайн)</div><div class="mut">Платформа Tau · Платформа Upsilon, Phi · Платформа Chi</div></div></div></div>
+<div class="note">
+ <span class="lg"><span><i class="mk m1"></i>рівень 1</span><span><i class="mk m2"></i>рівень 2</span><span><i class="mk m3"></i>відкрита</span></span>
+ <span class="lg"><span class="ok">виплата врегульована</span><span class="warn">умовна або не врегульована</span></span>
+ <span>* вік ≤ 20 р. · ** тільки через організацію · *** акаунт платформи</span><span>example.org · docs.example.org · a.example.org · b.example.org · c.example.org · d.example.org · e.example.org · f.example.org · g.example.org</span>
+</div></section><section class="slide data" style="--h1:88px;--logo:block;--tw:1610px"><div class="logo"></div>
+<div><h1 class="h1">ТОП організацій, за середнім зведеним показником</h1></div>
+<div class="cols"><div class="col"><div class="col-h"><b>Показник загалом</b><span>усі заявники</span></div><div class="col-b"><div class="ln"><div class="t">Організація Альфа<span>1 825 заяв</span></div><div class="tr2"><i></i></div><div class="v">174.9</div></div><div class="ln"><div class="t">Організація Бета-Гамма<span>1 579 заяв</span></div><div class="tr2"><i style="width:65%;background:var(--bar)"></i></div><div class="v">168.7</div></div><div class="ln"><div class="t">Організація Дельта<span>6 117 заяв</span></div><div class="tr2"><i style="width:48%;background:var(--bar)"></i></div><div class="v">162.3</div></div><div class="ln"><div class="t">Інститут Епсилон<span>274 заяви</span></div><div class="tr2"><i style="width:41%;background:var(--bar)"></i></div><div class="v">160.0</div></div><div class="ln"><div class="t">Академія Зета<span>14 695 заяв</span></div><div class="tr2"><i style="width:37%;background:var(--bar)"></i></div><div class="v">158.3</div></div><div class="ln"><div class="t">Центр Ета<span>231 заява</span></div><div class="tr2"><i style="width:35%;background:var(--bar)"></i></div><div class="v">157.8</div></div><div class="ln"><div class="t">Організація Тета<span>33 318 заяв</span></div><div class="tr2"><i style="width:31%;background:var(--accent)"></i></div><div class="v">156.4</div></div><div class="ln"><div class="t">Організація Йота<span>9 403 заяви</span></div><div class="tr2"><i style="width:30%;background:var(--bar)"></i></div><div class="v">156.0</div></div><div class="ln"><div class="t">Організація Каппа<span>15 730 заяв</span></div><div class="tr2"><i style="width:29%;background:var(--bar)"></i></div><div class="v">155.6</div></div><div class="ln"><div class="t">Академія Лямбда<span>18 894 заяви</span></div><div class="tr2"><i style="width:29%;background:var(--bar)"></i></div><div class="v">155.4</div></div></div></div><div class="col"><div class="col-h"><b>Показник — напрям A</b><span>усі заявники</span></div><div class="col-b"><div class="ln"><div class="t">Організація Альфа<span>1 822 заяви</span></div><div class="tr2"><i style="width:100%;background:var(--ok)"></i></div><div class="v">181.2</div></div><div class="ln"><div class="t">Організація Бета-Гамма<span>1 579 заяв</span></div><div class="tr2"><i style="width:59%;background:var(--bar)"></i></div><div class="v">166.5</div></div><div class="ln"><div class="t">Академія Зета<span>14 695 заяв</span></div><div class="tr2"><i style="width:25%;background:var(--bar)"></i></div><div class="v">153.9</div></div><div class="ln"><div class="t">Університет Мю<span>628 заяв</span></div><div class="tr2"><i style="width:22%;background:var(--bar)"></i></div><div class="v">153.0</div></div><div class="ln"><div class="t">Організація Тета<span>33 316 заяв</span></div><div class="tr2"><i style="width:19%;background:var(--accent)"></i></div><div class="v">151.8</div></div><div class="ln"><div class="t">Інститут Ню<span>38 304 заяви</span></div><div class="tr2"><i style="width:17%;background:var(--accent)"></i></div><div class="v">151.2</div></div><div class="ln"><div class="t">Політехніка Ксі<span>56 456 заяв</span></div><div class="tr2"><i style="width:14%;background:var(--bar)"></i></div><div class="v">150.0</div></div><div class="ln"><div class="t">Центр Ета<span>231 заява</span></div><div class="tr2"><i style="width:11%;background:var(--bar)"></i></div><div class="v">149.1</div></div><div class="ln"><div class="t">Організація Пі<span>45 567 заяв</span></div><div class="tr2"><i style="width:11%;background:var(--bar)"></i></div><div class="v">149.0</div></div><div class="ln"><div class="t">Інститут Епсилон<span>273 заяви</span></div><div class="tr2"><i style="width:3%;background:var(--bar)"></i></div><div class="v">146.1</div></div></div></div><div class="col"><div class="col-h"><b>Показник — напрям B</b><span>усі заявники</span></div><div class="col-b"><div class="ln"><div class="t">Організація Альфа<span>667 заяв</span></div><div class="tr2"><i style="width:83%;background:var(--ok)"></i></div><div class="v">175.0</div></div><div class="ln"><div class="t">Організація Бета-Гамма<span>373 заяви</span></div><div class="tr2"><i style="width:83%;background:var(--bar)"></i></div><div class="v">175.0</div></div><div class="ln"><div class="t">Академія Зета<span>2 272 заяви</span></div><div class="tr2"><i style="width:38%;background:var(--bar)"></i></div><div class="v">158.6</div></div><div class="ln"><div class="t">Університет Мю<span>166 заяв</span></div><div class="tr2"><i style="width:33%;background:var(--bar)"></i></div><div class="v">156.8</div></div><div class="ln"><div class="t">Політехніка Ксі<span>14 738 заяв</span></div><div class="tr2"><i style="width:32%;background:var(--bar)"></i></div><div class="v">156.7</div></div><div class="ln"><div class="t">Організація Йота<span>860 заяв</span></div><div class="tr2"><i style="width:27%;background:var(--bar)"></i></div><div class="v">154.7</div></div><div class="ln"><div class="t">Організація Пі<span>4 590 заяв</span></div><div class="tr2"><i style="width:25%;background:var(--bar)"></i></div><div class="v">154.2</div></div><div class="ln"><div class="t">Інститут Ро<span>4 093 заяви</span></div><div class="tr2"><i style="width:25%;background:var(--bar)"></i></div><div class="v">153.9</div></div><div class="ln"><div class="t">Організація Тета<span>5 131 заява</span></div><div class="tr2"><i style="width:25%;background:var(--accent)"></i></div><div class="v">153.9</div></div><div class="ln"><div class="t">Організація Каппа<span>1 575 заяв</span></div><div class="tr2"><i style="width:22%;background:var(--bar)"></i></div><div class="v">152.9</div></div></div></div></div>
+<div class="note lg">
+ <span><i class="swatch" style="background:var(--ok)"></i>Організація Альфа — лідер</span>
+ <span><i class="swatch" style="background:var(--accent)"></i>Виділено акцентом — приклад підсвітки</span>
+ <span>Шкала смуги — від 145.0 балів</span>
+</div></section><section class="slide data" style="--h1:56px;--logo:block;--tw:1610px"><div class="logo"></div>
+  <div><h1 class="h1">Заявники у 2025/26: обсяги, топ організацій та найпопулярніші напрями підготовки</h1></div>
+  <div class="kpis k2"><div class="kpi row"><div class="kv2">178,7 тис.</div><div class="kl">заявників на 2025/26 рік (−4,8% р/р)</div></div><div class="kpi row"><div class="kv2">1,2 млн</div><div class="kl">заяв, поданих у сезоні</div></div></div>
+  <div class="two"><div class="tcol"><div class="lbl">Напрями за популярністю (заяв, 2026)</div><div class="tw"><div class="thead"><div class="r g3 th"><div class="c-anchor">Напрям</div><div class="num">К-сть заяв, 2026</div><div class="num">Частка від 1 234 567</div></div></div><div class="tbody"><div class="r g3"><div class="c-anchor">Напрям Альфа</div><div class="num">104 281</div><div class="num">8,4%</div></div><div class="r g3"><div class="c-anchor">Напрям Бета</div><div class="num">66 011</div><div class="num">5,3%</div></div><div class="r g3"><div class="c-anchor">Напрям Гамма</div><div class="num">61 212</div><div class="num">5,0%</div></div><div class="r g3"><div class="c-anchor">Напрям Дельта</div><div class="num">48 993</div><div class="num">4,0%</div></div><div class="r g3"><div class="c-anchor">Напрям Епсилон</div><div class="num">42 621</div><div class="num">3,5%</div></div><div class="r g3"><div class="c-anchor">Напрям Зета</div><div class="num">40 252</div><div class="num">3,3%</div></div><div class="r g3"><div class="c-anchor">Напрям Ета, підрозділ</div><div class="num">37 037</div><div class="num">3,0%</div></div></div></div></div><div class="tcol"><div class="lbl">Топ організацій за кількістю заяв, 2026</div><div class="tw"><div class="thead"><div class="r g4 th"><div class="c-anchor">Організація</div><div class="num">Заяв, 2026</div><div class="num">Частка від 1 234 567</div><div class="c-text">Місто</div></div></div><div class="tbody"><div class="r g4"><div class="c-anchor">Політехніка Ксі</div><div class="num">64 492</div><div class="num">5,2%</div><div class="c-text">Місто Альфа</div></div><div class="r g4"><div class="c-anchor">Організація Пі, головний кампус</div><div class="num">51 829</div><div class="num">4,2%</div><div class="c-text">Місто Альфа</div></div><div class="r g4"><div class="c-anchor">Інститут Ню</div><div class="num">41 570</div><div class="num">3,4%</div><div class="c-text">Місто Бета</div></div><div class="r g4"><div class="c-anchor">Організація Тета</div><div class="num">36 498</div><div class="num">3,0%</div><div class="c-text">Місто Бета</div></div><div class="r g4"><div class="c-anchor">Університет Сигма</div><div class="num">28 166</div><div class="num">2,3%</div><div class="c-text">Місто Бета</div></div><div class="r g4"><div class="c-anchor">Університет Тау</div><div class="num">26 567</div><div class="num">2,2%</div><div class="c-text">Місто Гамма</div></div><div class="r g4"><div class="c-anchor">Університет Іпсилон</div><div class="num">26 239</div><div class="num">2,1%</div><div class="c-text">Місто Дельта</div></div><div class="r g4"><div class="c-anchor">Організація Фі</div><div class="num">24 213</div><div class="num">2,0%</div><div class="c-text">Місто Бета</div></div><div class="r g4"><div class="c-anchor">Організація Каппа</div><div class="num">18 477</div><div class="num">1,5%</div><div class="c-text">Місто Епсилон</div></div><div class="r g4"><div class="c-anchor">Академія Зета</div><div class="num">15 765</div><div class="num">1,3%</div><div class="c-text">Місто Бета</div></div></div></div></div></div>
+  <div class="note"><span>Приклад даних · частки рахуються від 1 234 567 заяв</span></div>
+</section><section class="slide data" style="--h1:88px;--logo:block;--tw:1610px"><div class="logo"></div>
+  <div><h1 class="h1">Контекст напряму</h1></div>
+  <div class="kpis k4"><div class="kpi top"><div class="kv2 ">+2.9%</div><div class="kl">учасників у сегменті (2025 vs 2024)</div></div><div class="kpi top"><div class="kv2 ">1 з 5</div><div class="kl">розглядає зміну напряму</div></div><div class="kpi top"><div class="kv2 ">32,8</div><div class="kl">середній вік учасника, +2 роки з 2023</div></div><div class="kpi top"><div class="kv2 ">82%+</div><div class="kl">частка рівнів 2, 3 і 4</div></div><div class="kpi top"><div class="kv2 ">8.5%</div><div class="kl">рівня 1 у вибірці, прогнозується дефіцит рівня 2</div></div><div class="kpi top"><div class="kv2 ">+7%</div><div class="kl">позицій у H1 2026</div><div class="kx"><b>↑ Напрями Альфа, Бета, Гамма, Дельта, Зета</b><br><s>↓ Напрям Ета (−515)</s></div></div><div class="kpi top"><div class="kv2 two-line">52→47%<br>56→47%</div><div class="kl">успішність пошуку: рівень 2 / рівень 3 за рік</div></div><div class="kpi top"><div class="kv2 sm">30% / 34%</div><div class="kl">готові змінити напрям: група A / група B</div></div></div>
+  <div class="note"><span>Джерело: приклад даних, H1 2026</span></div>
+</section><section class="slide data" style="--h1:88px;--logo:block;--tw:1610px"><div class="logo"></div>
+  <div><h1 class="h1">Джерела набору за напрямами</h1></div>
+  <div class="chart"><div class="cbox"><div class="thead"><div class="cap">Топ-10 джерел за часткою у вибірці</div></div><div class="cbody"><div class="crow"><div>Інститут Ню</div><div class="b"><i class="hi" style="width:100%"></i></div><div class="n">13.5%</div></div><div class="crow"><div>Організація Тета</div><div class="b"><i class="hi" style="width:99%"></i></div><div class="n">13.3%</div></div><div class="crow"><div>Організація Фі</div><div class="b"><i class="" style="width:44%"></i></div><div class="n">5.9%</div></div><div class="crow"><div>Центр Хі</div><div class="b"><i class="" style="width:36%"></i></div><div class="n">4.8%</div></div><div class="crow"><div>Університет Сигма</div><div class="b"><i class="" style="width:30%"></i></div><div class="n">4.0%</div></div><div class="crow"><div>Академія Зета</div><div class="b"><i class="" style="width:27%"></i></div><div class="n">3.7%</div></div><div class="crow"><div>Політехніка Ксі</div><div class="b"><i class="" style="width:16%"></i></div><div class="n">2.2%</div></div><div class="crow"><div>Організація Каппа</div><div class="b"><i class="" style="width:14%"></i></div><div class="n">1.9%</div></div><div class="crow"><div>Центр Псі</div><div class="b"><i class="" style="width:10%"></i></div><div class="n">1.3%</div></div><div class="crow"><div>Організація Пі</div><div class="b"><i class="" style="width:10%"></i></div><div class="n">1.3%</div></div></div></div><div class="cbox"><div class="thead"><div class="cap">Що це дає напрямам</div></div><div class="says"><div class="say"><span><b>Ню + Тета</b> — основні для напрямів Альфа, Бета, Гамма</span></div><div class="say"><span><b>Фі</b> — основний для напряму Дельта</span></div><div class="say"><span><b>Омега (Хі-Псі)</b> — основний для напряму Епсилон</span></div><div class="say"><span><b>Зета</b> — основний для напрямів Бета / Гамма</span></div><div class="say sum"><span>Топ-10 — близько 55% вибірки, решта 45% — інші 300+ джерел</span></div></div></div></div>
+  <div class="note"><span>Вибірка 1 582 · приклад даних</span></div>
+</section></div>
