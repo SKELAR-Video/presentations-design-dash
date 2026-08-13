@@ -1,178 +1,177 @@
 <meta charset="utf-8"><title>SKELAR — еталон базових типів слайдів</title>
+<!--
+  Значення взяті з Figma-бібліотеки типів (файл Claude, вузол 678:2020) через
+  get_design_context, а не на око. Назви типів — ті самі, що в бібліотеці:
+  Title+txt, Agenda N, Bento Bottom N, Bento Bottom Number N, Bento Right N,
+  Column Red Circle N, Column Text N, Column Red Line N, Half screen Bullits N.
+
+  Три відхилення від макета, свідомі й узгоджені:
+  · усе зведено до сітки 100 (у частині фреймів блоки стояли на 90);
+  · смуги контенту закінчуються рівно на 980 (у частині фреймів 979);
+  · цифра в червоному кружечку біла, а не #FCCACA — контраст 1.6:1 не читається.
+
+  Кегль НЕ константа. Кожен тип показаний двічі: коротким текстом і довгим,
+  щоб було видно діапазон, а не одну точку. Заголовок 118px там, де вміщається,
+  87px там, де колонка вужча. Береться найбільший, при якому не переповнено.
+-->
 <style>
 html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 :root{
- --ink0:#0F131D;   /* фон слайда */
- --ink1:#1C202B;   /* картка-контейнер */
- --ink2:#292D39;   /* шапка, піднята поверхня, чип */
- --ink3:#343945;   /* доріжка, межа картки */
- --line:#414653;   /* розділювачі */
- --dim:#6E737F;    /* третій рівень тексту */
- --mut:#A2A6B1;    /* другий рівень тексту */
+ --bg:#090D17;      /* фон слайда — еталонний темний */
+ --card:#292D39;    /* картка, чип, піднята поверхня */
+ --mut:#A2A6B1;     /* текст картки, підписи */
  --txt:#FFFFFF;
- --accent:#FD3433; /* бренд, не оцінка */
+ --accent:#FD3433;  /* бренд: плашка знака, шкала, точка, кружечок */
+ --pad:100px;       /* поле слайда з усіх боків */
+ --w:1720px;        /* ширина контенту: 1920 − 2×100 */
+ --r:30px;          /* радіус картки */
+ --cp:40px;         /* внутрішній відступ картки */
 }
-.slide{width:1920px;height:1080px;box-sizing:border-box;padding:100px;margin:0 auto 40px;
- background:var(--ink0);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:52px;
+.slide{width:1920px;height:1080px;box-sizing:border-box;position:relative;overflow:hidden;
+ margin:0 auto 40px;background:var(--bg);color:var(--txt);
  font-family:Inter,"Inter Variable",system-ui,sans-serif;font-weight:500;font-variation-settings:'wght' 500;
- font-synthesis:none;color:var(--txt);line-height:1.19;-webkit-font-smoothing:antialiased}
+ font-synthesis:none;line-height:1.18;-webkit-font-smoothing:antialiased}
 
-/* Логотип — знак із файлу, гострі кути, ніякого border-radius.
-   У згенерованому деку src замінюється на data: URI, щоб файл був самодостатнім. */
-.logo{position:absolute;left:1730px;top:100px;width:90px;height:90px}
-/* Друга й остання дозволена позиція: лівий низ. Береться тоді, коли правий
-   верх зайнятий контентом — саме так зроблено в офіційному макеті цього типу. */
+/* Логотип. Квадратний 90×90 — правий верх (1730,100) або лівий низ (100,890),
+   і тоді його низ лягає рівно на 980. Довгий 357.5×90 — тільки на перебивці.
+   Кути гострі: жодного border-radius. Вага на всіх заголовках — явно 500,
+   бо успадкована не перебиває браузерний bold на h1. */
+.logo{position:absolute;left:1730px;top:100px;width:90px;height:90px;background:var(--accent)}
 .logo.bl{left:100px;top:auto;bottom:100px}
-.logo img{display:block;width:100%;height:100%}
-.wordmark{position:absolute;left:1610px;top:100px;height:56px}
-.wordmark img{display:block;height:100%;width:auto}
+.logo i{position:absolute;left:24.19px;top:24.19px;width:41.625px;height:41.625px;
+ background:var(--txt);clip-path:polygon(38% 0,100% 0,100% 45%,62% 45%,62% 72%,38% 72%,38% 100%,0 100%,0 55%,38% 55%)}
+.wordmark{position:absolute;left:1463px;top:100px;width:357.488px;height:90px;background:var(--accent);
+ display:flex;align-items:center;justify-content:center}
+.wordmark img{display:block;width:304.744px;height:41.86px}
 
-.h1{width:1500px;font-size:72px;line-height:1.15;margin:0;font-weight:500}
-.h1.big{font-size:88px}
+.h1{position:absolute;left:var(--pad);top:var(--pad);margin:0;font-weight:500;
+ font-size:var(--h1,118px);line-height:1;width:var(--h1w,1339px)}
+.h1.tight{line-height:1.05}     /* 87px і менше — інтерліньяж не менший за кегль */
 
-/* ── 1 · обкладинка ────────────────────────────────────────────────────────
-   Фон-фотографія, затемнення знизу, назва в лівому нижньому кутку. */
-.cover{padding:0;justify-content:flex-end}
-.cover .bg{position:absolute;inset:0}
-.cover .bg img{width:100%;height:100%;object-fit:cover;display:block}
-.cover .shade{position:absolute;inset:0;
- background:linear-gradient(180deg,rgba(15,19,29,.35) 0%,rgba(15,19,29,.15) 45%,rgba(15,19,29,.92) 100%)}
-.cover .body{position:relative;padding:100px;display:flex;flex-direction:column;gap:34px}
-.cover .h1{font-size:120px;line-height:1.08;width:1500px}
-.cover .meta{font-size:28px;color:var(--mut)}
+/* ── Title+txt · перебивка ─────────────────────────────────────────────────
+   Дата-чип ліворуч (r20, p40, 48px сірий), довгий знак праворуч, теза по
+   центру 157/160, підзаголовок 48 сірий шириною 943. */
+.tt{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;
+ box-sizing:border-box;padding:var(--pad);text-align:center}
+.chip{position:absolute;left:var(--pad);top:99px;background:var(--card);color:var(--mut);
+ border-radius:20px;padding:40px;font-size:48px;line-height:1.18}
+.tt .st{margin:0;font-size:var(--st,157px);line-height:calc(var(--st,157px) + 3px);
+ font-weight:500;max-width:var(--w)}
+.tt .sub{margin:40px 0 0;font-size:48px;color:var(--mut);max-width:943px}
+.slide.red{background:var(--accent)}
+.slide.red .sub{color:rgba(255,255,255,.85)}
 
-/* ── 2 · перебивка (центральна виключка) ───────────────────────────────────
-   Дата-чип ліворуч, знак праворуч, теза по центру. Порожнеча тут — задум. */
-.center{justify-content:center;align-items:center;text-align:center}
-.chip{position:absolute;left:100px;top:100px;background:var(--ink2);color:var(--mut);
- border-radius:14px;padding:14px 26px;font-size:24px}
-/* Текст тут не фарбується. Правило про червоний я вже раз обійшов саме тут —
-   виділив слово акцентом. Класу для червоного тексту в еталоні немає навмисно:
-   чого немає в прикладі, того не скопіюють. */
-.center .st{font-size:96px;line-height:1.1;max-width:1400px;margin:0;font-weight:500}
+/* ── Agenda N ──────────────────────────────────────────────────────────────
+   Точка 54 на y550, номер 48 сірий на y493, підпис 36 білий на y643.
+   Шкала йде від центра першої точки до центра останньої, а не за край слайда.
+   Колонок 3–8; більше — щільніше в тому ж патерні, новий тип не вводиться. */
+.tl{position:absolute;left:var(--pad);top:493px;width:var(--w);
+ display:flex;flex-direction:column;gap:70px}
+.tl-row{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:81px;position:relative}
+.tl-row::before{content:'';position:absolute;top:84px;height:3px;background:var(--accent);
+ left:27px;right:calc((100% - (var(--n) - 1)*81px)/var(--n) - 27px)}
+.tl-i .n{font-size:48px;color:var(--mut);line-height:1.18}
+.tl-i .d{width:54px;height:54px;border-radius:50%;background:var(--accent);margin:22px 0 39px;position:relative;z-index:1}
+.tl-i .l{font-size:36px;line-height:1.18}
 
-/* ── 2б · червона перебивка ────────────────────────────────────────────────
-   Тло FD3433 на весь слайд. Знак тут ТІЛЬКИ білий: `SKELAR Logo white.png`
-   (довгий) або `SKELAR Symbol for red.png` (квадратний). Червона плашка на
-   червоному тлі не читається — саме це й було в живому деку. */
-.red{background:var(--accent);justify-content:center}
-.red .st{font-size:96px;line-height:1.1;max-width:1500px;margin:0;font-weight:500}
-.red .sub2{font-size:28px;line-height:1.4;max-width:900px;color:rgba(255,255,255,.82);margin:28px 0 0}
+/* ── Bento Bottom N · картки в нижній смузі ────────────────────────────────
+   Смуга 500→980 (висота 480), проміжок 30. Картка: фон card, r30, p40,
+   текст 48 сірий, вертикально по центру. Висота картки вільна — тягнеться
+   на всю смугу; при довгому тексті кегль опускається, а не картка росте. */
+.band{position:absolute;left:var(--pad);top:500px;width:var(--w);height:480px;
+ display:flex;gap:30px;align-items:stretch}
+.card{background:var(--card);border-radius:var(--r);padding:var(--cp);box-sizing:border-box;
+ flex:1 1 0;min-width:0;display:flex;align-items:center;
+ font-size:var(--cs,48px);line-height:1.18;color:var(--mut)}
 
-/* ── 3 · адженда ───────────────────────────────────────────────────────────
-   Червона шкала, номер над точкою, підпис під нею. 5+ пунктів переходять
-   на другий рядок; шкала кожного рядка своя. */
-.tl{display:flex;flex-direction:column;gap:64px;margin-top:40px}
-.tl-row{display:grid;gap:40px;position:relative}
-.tl-row::before{content:'';position:absolute;left:0;right:0;top:38px;height:2px;background:var(--accent)}
-.tl-i{position:relative;padding-top:0}
-.tl-i .n{font-size:26px;color:var(--mut)}
-.tl-i .d{width:20px;height:20px;border-radius:50%;background:var(--accent);margin:8px 0 18px;position:relative;z-index:1}
-.tl-i .l{font-size:24px;line-height:1.25;color:var(--txt);max-width:300px}
+/* ── Bento Bottom Number N ────────────────────────────────────────────────
+   Та сама смуга, але картка — колонка: номер 98 білий, під ним 38 сірий,
+   проміжок 40, вміст притиснутий до верху. */
+.card.num{flex-direction:column;align-items:flex-start;gap:40px}
+.card.num b{font-weight:500;font-size:98px;line-height:1;color:var(--txt)}
+.card.num span{font-size:38px;line-height:1.18;color:var(--mut)}
 
-/* ── 4 · текстові блоки ────────────────────────────────────────────────────
-   Точка на вершині вертикальної червоної лінії, текст праворуч від неї.
-   Дві колонки — кегль 30, три — 24. */
-.tb{display:grid;gap:60px;flex:1 1 auto;min-height:0;align-content:start;margin-top:20px}
-.tb.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.tb.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.tb-i{display:grid;grid-template-columns:20px minmax(0,1fr);gap:22px;position:relative}
-.tb-i .rail{width:20px}
-.tb-i .rail i{display:block;width:20px;height:20px;border-radius:50%;background:var(--accent)}
-.tb-i .rail s{display:block;width:2px;height:430px;background:var(--accent);margin-left:9px;text-decoration:none}
-.tb.c2 .tb-i .t{font-size:30px;line-height:1.3}
-.tb.c3 .tb-i .t{font-size:24px;line-height:1.3}
+/* ── Bento Right N · заголовок ліворуч, картки праворуч ───────────────────
+   Колонка 860 шириною на x960, від 100 до 980. Логотип тут у лівому низу,
+   бо правий верх зайнятий карткою. */
+.right{position:absolute;left:960px;top:100px;width:860px;height:880px;
+ display:flex;flex-direction:column;gap:30px}
+.right .card{flex:1 1 0}
 
-/* ── 5 · нумеровані блоки ──────────────────────────────────────────────────
-   Картка з номером над текстом. Радіус картки 22px — на картці він є,
-   на логотипі його немає ніколи. */
-.nb{display:grid;gap:30px;margin-top:20px}
-.nb.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.nb-i{background:var(--ink1);border:1px solid var(--ink3);border-radius:22px;padding:34px;
- display:flex;flex-direction:column;gap:14px;min-height:300px}
-.nb-i .n{font-size:44px;line-height:1}
-.nb-i .t{font-size:26px;line-height:1.3;color:var(--mut)}
+/* ── Column Red Circle N ──────────────────────────────────────────────────
+   Кружечок 75 (r70, p20) на y411, цифра 48 біла. Текст 48 білий на y540,
+   колонки по 400 висоти, проміжок 50. */
+.cols{position:absolute;left:var(--pad);top:540px;width:var(--w);
+ display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:50px;align-items:start}
+.cols .t{font-size:var(--cs,48px);line-height:1.18}
+.circ{position:absolute;top:411px;width:75px;height:75px;border-radius:70px;background:var(--accent);
+ display:flex;align-items:center;justify-content:center;font-size:48px;line-height:1;color:var(--txt)}
 
-/* ── 6 · фото на пів екрана ────────────────────────────────────────────────
-   Ліворуч заголовок і нумерований список, праворуч фото до самого краю
-   слайда. Логотипа тут немає: фото підходить упритул, охоронного поля
-   не лишається — правило каже не ставити взагалі, а не зменшувати. */
-.half{padding:0;flex-direction:row;gap:0}
-.half .side{width:960px;flex:none;padding:100px;display:flex;flex-direction:column;gap:52px;box-sizing:border-box}
-.half .pic{flex:1 1 auto;min-width:0}
+/* ── Column Text N · надзаголовок і абзац, без карток і без цифр ──────────
+   Надзаголовок 48 сірий на y451, тіло 38 біле на y540. Різниця з Red Line
+   лише в сітці: тут текст починається від поля, там — на 85px правіше. */
+.subs{position:absolute;left:var(--pad);top:451px;width:var(--w);
+ display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:50px}
+.subs .s{font-size:48px;color:var(--mut);line-height:1.18}
+
+/* ── Column Red Line N ────────────────────────────────────────────────────
+   Точка 54 і вертикальна лінія ліворуч; текст 36 відступає на 85px, бо ці
+   85px зайняті точкою з лінією. Лінія обмежена смугою контенту, не тягнеться
+   за низ слайда. */
+.rails{position:absolute;left:var(--pad);top:467px;width:var(--w);
+ display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:50px}
+.rail-i{display:grid;grid-template-columns:85px minmax(0,1fr)}
+.rail{position:relative;width:54px}
+.rail i{display:block;width:54px;height:54px;border-radius:50%;background:var(--accent)}
+.rail s{display:block;width:3px;height:400px;background:var(--accent);margin:0 0 0 25.5px;text-decoration:none}
+.rail-i .t{font-size:36px;line-height:1.18;padding-top:5px}
+
+/* ── Half screen Bullits N ────────────────────────────────────────────────
+   Фото — рівно права половина, 960×1080, cover по центру: при заміні кадру
+   нічого не зсувається. Заголовок 87 у ширині 827. Пункт: кружечок 68 (цифра
+   38) і текст 48 сірий шириною 578 з відступом 190; крок між пунктами 182. */
+.half .pic{position:absolute;left:960px;top:0;width:960px;height:1080px}
 .half .pic img{width:100%;height:100%;object-fit:cover;display:block}
-.half .h1{width:auto;font-size:56px}
+/* Затемнення під текстом на фото-перебивці: без нього білий текст губиться
+   на світлих ділянках кадру. */
+.shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,13,23,.45) 0%,rgba(9,13,23,.25) 45%,rgba(9,13,23,.75) 100%)}
+.bul{position:absolute;left:var(--pad);top:450px;width:768px;
+ display:flex;flex-direction:column;gap:74px}
+.bul-i{display:grid;grid-template-columns:90px minmax(0,1fr);align-items:start}
+.bul-i b{font-weight:500;width:68px;height:68px;border-radius:70px;background:var(--accent);
+ display:flex;align-items:center;justify-content:center;font-size:38px;line-height:1;color:var(--txt)}
+.bul-i .t{font-size:48px;line-height:1.18;color:var(--mut)}
 
-/* нумерований список: червоне коло, біла цифра, текст праворуч */
-.nlist{display:flex;flex-direction:column;gap:34px}
-.nli{display:grid;grid-template-columns:34px minmax(0,1fr);gap:20px;align-items:start}
-.nli b{font-weight:500;width:34px;height:34px;border-radius:50%;background:var(--accent);
- color:var(--txt);font-size:17px;display:flex;align-items:center;justify-content:center;margin-top:2px}
-.nli .t{font-size:24px;line-height:1.3;color:var(--mut)}
-
-/* ── 7 · картки з абзацом ──────────────────────────────────────────────────
-   Той самий блок, що й нумерований, але текст довший за рядок. 2, 3 або 4
-   картки; більше чотирьох у цей тип не кладеться. */
-.cards{display:grid;gap:30px;flex:1 1 auto;min-height:0;align-content:start;margin-top:20px}
-.cards.k2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.cards.k3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.cards.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
-.card{background:var(--ink1);border:1px solid var(--ink3);border-radius:22px;padding:34px;
- font-size:22px;line-height:1.35;color:var(--mut);min-height:300px}
-.cards.k2 .card{font-size:26px}
-
-/* ── 8 · заголовок ліворуч, стос карток праворуч ───────────────────────────
-   Для 2–4 тез, коли заголовок довгий і має триматись окремо. */
-.split{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:60px}
-.split .lead{font-size:72px;line-height:1.15;align-self:start}
-.split .stack{display:flex;flex-direction:column;gap:24px}
-.split .card{min-height:0;flex:1 1 auto;display:flex;align-items:center}
-
-.note{position:absolute;left:100px;right:100px;top:980px;height:100px;margin:0;
- display:flex;align-items:center;gap:40px;font-size:19px;color:var(--dim)}
+.note{position:absolute;left:var(--pad);right:var(--pad);top:980px;height:100px;margin:0;
+ display:flex;align-items:center;font-size:24px;color:var(--mut)}
 </style>
 
 <div class="stage">
 
-<!-- 1 · обкладинка -->
-<section class="slide basic cover">
-  <div class="bg"><img src="content/backgrounds/Mountain 2.jpg" alt=""></div>
-  <div class="shade"></div>
-  <div class="wordmark"><img src="content/SKELAR Logo.png" alt="SKELAR"></div>
-  <div class="body">
-    <h1 class="h1">Категорії застосунків для iPhone</h1>
-    <div class="meta">Серпень 2026 · внутрішній огляд</div>
-  </div>
-</section>
-
-<!-- 2 · перебивка -->
-<section class="slide basic center">
+<!-- 1 · Title+txt — перебивка з датою й підзаголовком -->
+<section class="slide basic">
   <div class="chip">Серпень 2026</div>
-  <div class="wordmark"><img src="content/SKELAR Logo.png" alt="SKELAR"></div>
-  <p class="st">Три категорії тримають понад половину витрат у магазині</p>
-</section>
-
-<!-- 2б · червона перебивка, одна теза -->
-<section class="slide basic red">
   <div class="wordmark"><img src="content/SKELAR Logo white.png" alt="SKELAR"></div>
-  <p class="st">Результати першого півріччя</p>
-</section>
-
-<!-- 2в · червона перебивка з підзаголовком -->
-<section class="slide basic red">
-  <div class="wordmark"><img src="content/SKELAR Logo white.png" alt="SKELAR"></div>
-  <div>
-    <p class="st">Контексти і вхідні дані</p>
-    <p class="sub2">Що ми знали на початку періоду і які припущення заклали в план на наступний.</p>
+  <div class="tt">
+    <p class="st">Центральна виключка</p>
+    <p class="sub">Створити продукт із хорошою юніт-економікою та стабільним revenue — це лише перший крок.</p>
   </div>
 </section>
 
-<!-- 3 · адженда, 4 пункти -->
+<!-- 2 · Title — червона перебивка, довгий текст: теза 96 замість 157 -->
+<section class="slide basic red" style="--st:96px">
+  <div class="wordmark"><img src="content/SKELAR Logo white.png" alt="SKELAR"></div>
+  <div class="tt">
+    <p class="st">Три категорії тримають понад половину витрат у магазині</p>
+  </div>
+</section>
+
+<!-- 3 · Agenda 4 -->
 <section class="slide basic">
-  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
-  <div><h1 class="h1">Адженда</h1></div>
+  <div class="logo"><i></i></div>
+  <h1 class="h1">Адженда</h1>
   <div class="tl">
-    <div class="tl-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+    <div class="tl-row" style="--n:4">
       <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків і навіщо вони потрібні</div></div>
       <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує в магазині</div></div>
       <div class="tl-i"><div class="n">03</div><div class="d"></div><div class="l">Магазин у цифрах</div></div>
@@ -181,103 +180,131 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
   </div>
 </section>
 
-<!-- 4 · адженда, 6 пунктів у два рядки -->
+<!-- 4 · Agenda 8 — межа типу: два рядки по чотири, той самий патерн -->
 <section class="slide basic">
-  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
-  <div><h1 class="h1">Адженда</h1></div>
+  <div class="logo"><i></i></div>
+  <h1 class="h1">Адженда</h1>
   <div class="tl">
-    <div class="tl-row" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-      <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків і навіщо вони потрібні</div></div>
-      <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує в магазині</div></div>
+    <div class="tl-row" style="--n:4">
+      <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків</div></div>
+      <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує</div></div>
       <div class="tl-i"><div class="n">03</div><div class="d"></div><div class="l">Магазин у цифрах</div></div>
+      <div class="tl-i"><div class="n">04</div><div class="d"></div><div class="l">Найпопулярніші категорії</div></div>
     </div>
-    <div class="tl-row" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-      <div class="tl-i"><div class="n">04</div><div class="d"></div><div class="l">Найпопулярніші категорії застосунків</div></div>
-      <div class="tl-i"><div class="n">05</div><div class="d"></div><div class="l">Три категорії-лідери за доходом</div></div>
-      <div class="tl-i"><div class="n">06</div><div class="d"></div><div class="l">Чому користувачі повертаються: звички та утримання</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- 5 · текстові блоки, три колонки -->
-<section class="slide basic">
-  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
-  <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
-  <div class="tb c3">
-    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Чому користувачі повертаються: звички та утримання</div></div>
-    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Що тримає категорію в топі роками, а не один сезон</div></div>
-    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Де закінчується зростання і починається утримання</div></div>
-  </div>
-</section>
-
-<!-- 6 · текстові блоки, дві колонки, кегль крупніший -->
-<section class="slide basic">
-  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
-  <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
-  <div class="tb c2">
-    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Чому користувачі повертаються: звички та утримання</div></div>
-    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Що тримає категорію в топі роками, а не один сезон</div></div>
-  </div>
-</section>
-
-<!-- 7 · нумеровані блоки -->
-<section class="slide basic">
-  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
-  <div><h1 class="h1">Три категорії, що ведуть за доходом</h1></div>
-  <div class="nb n3">
-    <div class="nb-i"><div class="n">01</div><div class="t">Ігри — понад половина всіх витрат у магазині</div></div>
-    <div class="nb-i"><div class="n">02</div><div class="t">Підписки — стримінг, музика та хмарні сервіси</div></div>
-    <div class="nb-i"><div class="n">03</div><div class="t">Продуктивність — інструменти для роботи й навчання</div></div>
-  </div>
-  <div class="note"><span>Приклад даних</span></div>
-</section>
-
-<!-- 8 · фото на пів екрана з нумерованим списком -->
-<section class="slide basic half">
-  <div class="side">
-    <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
-    <div class="nlist">
-      <div class="nli"><b>1</b><div class="t">Ігри — понад половина всіх витрат у магазині</div></div>
-      <div class="nli"><b>2</b><div class="t">Підписки — стримінг, музика та хмарні сервіси</div></div>
-      <div class="nli"><b>3</b><div class="t">Продуктивність — інструменти для роботи й навчання</div></div>
+    <div class="tl-row" style="--n:4">
+      <div class="tl-i"><div class="n">05</div><div class="d"></div><div class="l">Три категорії-лідери</div></div>
+      <div class="tl-i"><div class="n">06</div><div class="d"></div><div class="l">Чому користувачі повертаються</div></div>
+      <div class="tl-i"><div class="n">07</div><div class="d"></div><div class="l">Звички та утримання</div></div>
+      <div class="tl-i"><div class="n">08</div><div class="d"></div><div class="l">Що робимо далі</div></div>
     </div>
   </div>
+</section>
+
+<!-- 5 · Bento Bottom 3 — короткий текст, кегль 48 -->
+<section class="slide basic">
+  <div class="logo"><i></i></div>
+  <h1 class="h1">Поговоримо про «бізнеси на століття»?</h1>
+  <div class="band">
+    <div class="card">Створити продукт із хорошою юніт-економікою — це лише перший крок</div>
+    <div class="card">Далі питання, чи лишиться він потрібним через десять років</div>
+    <div class="card">Звички змінюються повільніше, ніж технології довкола</div>
+  </div>
+</section>
+
+<!-- 6 · Bento Bottom 4 — довгий текст, кегль опустився до 38 -->
+<section class="slide basic" style="--cs:38px">
+  <div class="logo"><i></i></div>
+  <h1 class="h1">Поговоримо про «бізнеси на століття»?</h1>
+  <div class="band">
+    <div class="card">Створити продукт із хорошою юніт-економікою та стабільним revenue — це лише перший крок на довгій дистанції</div>
+    <div class="card">Далі починається інше питання: чи лишиться цей продукт потрібним людям через десять або двадцять років</div>
+    <div class="card">Звички користувачів змінюються значно повільніше, ніж технології довкола них, і це працює на нас</div>
+    <div class="card">Тому ми міряємо утримання, а не тільки зростання за квартал — воно показує, чи є фундамент</div>
+  </div>
+</section>
+
+<!-- 7 · Bento Bottom Number 3 -->
+<section class="slide basic">
+  <div class="logo"><i></i></div>
+  <h1 class="h1">Три категорії, що ведуть за доходом</h1>
+  <div class="band">
+    <div class="card num"><b>01</b><span>Ігри — понад половина всіх витрат у магазині</span></div>
+    <div class="card num"><b>02</b><span>Підписки — стримінг, музика та хмарні сервіси</span></div>
+    <div class="card num"><b>03</b><span>Продуктивність — інструменти для роботи й навчання</span></div>
+  </div>
+</section>
+
+<!-- 8 · Bento Right 2 — логотип у лівому низу, бо правий верх зайнятий -->
+<section class="slide basic" style="--h1w:813px">
+  <div class="logo bl"><i></i></div>
+  <h1 class="h1">Три категорії, що ведуть за доходом</h1>
+  <div class="right">
+    <div class="card">Ігри — понад половина всіх витрат у магазині</div>
+    <div class="card">Підписки — стримінг, музика та хмарні сервіси</div>
+  </div>
+</section>
+
+<!-- 9 · Column Red Circle 3 -->
+<section class="slide basic">
+  <div class="logo"><i></i></div>
+  <h1 class="h1">Три категорії, що ведуть за доходом</h1>
+  <div class="circ" style="left:100px">1</div>
+  <div class="circ" style="left:690px">2</div>
+  <div class="circ" style="left:1280px">3</div>
+  <div class="cols" style="--n:3">
+    <div class="t">Ігри — понад половина всіх витрат у магазині</div>
+    <div class="t">Підписки — стримінг, музика та хмарні сервіси</div>
+    <div class="t">Продуктивність — інструменти для роботи й навчання</div>
+  </div>
+</section>
+
+<!-- 10 · Column Text 3 — надзаголовок 48 сірий, тіло 38 біле -->
+<section class="slide basic">
+  <div class="logo"><i></i></div>
+  <h1 class="h1">Три категорії, що ведуть за доходом</h1>
+  <div class="subs" style="--n:3">
+    <div class="s">Ігри</div>
+    <div class="s">Підписки</div>
+    <div class="s">Продуктивність</div>
+  </div>
+  <div class="cols" style="--n:3;--cs:38px">
+    <div class="t">Понад половина всіх витрат у магазині припадає на ігри, і ця частка тримається роками</div>
+    <div class="t">Стримінг, музика та хмарні сервіси — друга за обсягом категорія витрат</div>
+    <div class="t">Інструменти для роботи й навчання зростають повільніше, зате майже не втрачають користувачів</div>
+  </div>
+</section>
+
+<!-- 11 · Column Red Line 3 — текст на 85px правіше, там точка з лінією -->
+<section class="slide basic" style="--h1:87px;--h1w:827px">
+  <div class="logo"><i></i></div>
+  <h1 class="h1 tight">Поговоримо про «бізнеси на століття»?</h1>
+  <div class="rails" style="--n:3">
+    <div class="rail-i"><div class="rail"><i></i><s></s></div><div class="t">Чому користувачі повертаються: звички та утримання</div></div>
+    <div class="rail-i"><div class="rail"><i></i><s></s></div><div class="t">Що тримає категорію в топі роками, а не один сезон</div></div>
+    <div class="rail-i"><div class="rail"><i></i><s></s></div><div class="t">Де закінчується зростання і починається утримання</div></div>
+  </div>
+</section>
+
+<!-- 12 · Half screen Bullits 3 — фото рівно пів екрана, cover -->
+<section class="slide basic half" style="--h1:87px;--h1w:827px">
   <div class="pic"><img src="content/half screen photos/2.jpg" alt=""></div>
-</section>
-
-<!-- 9 · картки з абзацом, три -->
-<section class="slide basic">
-  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
-  <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
-  <div class="cards k3">
-    <div class="card">Створити продукт із хорошою юніт-економікою та стабільним revenue — це лише перший крок.</div>
-    <div class="card">Далі починається інше питання: чи лишиться цей продукт потрібним через десять років.</div>
-    <div class="card">Ми прагнемо зробити так, щоб наші бізнеси лишались актуальними через 10, 20 чи 50 років.</div>
+  <h1 class="h1 tight">Поговоримо про «бізнеси на століття»?</h1>
+  <div class="bul">
+    <div class="bul-i"><b>1</b><div class="t">Ігри — понад половина всіх витрат</div></div>
+    <div class="bul-i"><b>2</b><div class="t">Підписки — стримінг і музика</div></div>
+    <div class="bul-i"><b>3</b><div class="t">Продуктивність — робота й навчання</div></div>
   </div>
 </section>
 
-<!-- 10 · картки з абзацом, чотири — межа цього типу -->
-<section class="slide basic">
-  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
-  <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
-  <div class="cards k4">
-    <div class="card">Створити продукт із хорошою юніт-економікою — це лише перший крок.</div>
-    <div class="card">Далі питання, чи лишиться продукт потрібним через десять років.</div>
-    <div class="card">Звички користувачів змінюються повільніше, ніж технології довкола них.</div>
-    <div class="card">Тому ми міряємо утримання, а не тільки зростання за квартал.</div>
-  </div>
-</section>
-
-<!-- 11 · заголовок ліворуч, стос карток праворуч -->
-<section class="slide basic">
-  <div class="logo bl"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
-  <div class="split">
-    <div class="lead">Три категорії, що ведуть за доходом</div>
-    <div class="stack">
-      <div class="card">Ігри — понад половина всіх витрат у магазині</div>
-      <div class="card">Підписки — стримінг, музика та хмарні сервіси</div>
-      <div class="card">Продуктивність — інструменти для роботи й навчання</div>
-    </div>
+<!-- 13 · Title 1 — та сама перебивка, але з фоном-фото. Окремого типу
+     «обкладинка» в бібліотеці немає: перший слайд дека — це Title 1. -->
+<section class="slide basic half" style="--st:118px">
+  <div class="pic" style="left:0;width:1920px"><img src="content/backgrounds/Mountain 2.jpg" alt=""></div>
+  <div class="shade"></div>
+  <div class="chip">Серпень 2026</div>
+  <div class="wordmark"><img src="content/SKELAR Logo white.png" alt="SKELAR"></div>
+  <div class="tt">
+    <p class="st">Категорії застосунків для iPhone</p>
   </div>
 </section>
 
