@@ -62,8 +62,15 @@
 
     const L = s.querySelector('.logo, [class*=logo]');
     if (L && getComputedStyle(L).display !== 'none') {
+      // Міряти до КРАЮ картки, не до її тексту. Раніше тут стояв ink() на всьому,
+      // і таблиця, що підійшла до логотипа на 15px своїм краєм, давала PASS: текст
+      // у ній був далеко лівіше. Правило каже «ближче нічого не підходить» — фон
+      // і межа картки це теж «щось». Для заголовка й виноски лишається ink:
+      // їхній бокс — на всю ширину слайда, і по ньому вимір безглуздий.
       const lb = L.getBoundingClientRect(); let g = Infinity;
-      s.querySelectorAll(BOX + ',h1,.note').forEach(e => { const b = ink(e);
+      const near = [...s.querySelectorAll(BOX)].map(e => e.getBoundingClientRect())
+        .concat([...s.querySelectorAll('h1,.note')].map(e => ink(e)));
+      near.forEach(b => {
         const dx = Math.max(lb.left-b.right, b.left-lb.right, 0), dy = Math.max(lb.top-b.bottom, b.top-lb.bottom, 0);
         g = Math.min(g, Math.max(dx, dy)); });
       t('охоронне поле логотипа ≥50px', g >= 50, Math.round(g));
@@ -76,6 +83,33 @@
         .filter(v => v && v !== '0px' && v !== '0%');
       t('логотип без скруглення', round.length === 0, round[0] || '0px');
     }
+
+    // Маркер-точка має щось означати. У еталоні кружечки кодують рівень, і поруч
+    // у виносці стоїть легенда. Точка без легенди — декор, який дорисували від себе:
+    // у ТЗ його не було, а на слайді він читається як класифікація, якої немає.
+    const dot = e => { const o = getComputedStyle(e), b = e.getBoundingClientRect();
+      return b.width <= 24 && b.width > 3 && Math.abs(b.width-b.height) <= 2
+        && /^(50%|9999px)/.test(o.borderRadius); };
+    const dots = [...s.querySelectorAll('*')].filter(e => !e.children.length && dot(e));
+    const inRows = dots.filter(e => !e.closest('.note')).length;
+    const inLegend = dots.filter(e => e.closest('.note')).length;
+    t('маркери-точки лише з легендою', inRows === 0 || inLegend > 0, `${inRows} у рядках / ${inLegend} у легенді`);
+
+    // Кегль — вимір із двома межами. «Не переповнено» я перевіряю завжди, а
+    // «не недовикористано» забував: рядок висотою 114px із текстом 23px виглядає
+    // акуратним, хоча половина картки — порожнеча, і текст міг бути крупнішим.
+    // Поріг 3.0 узятий із виміру: найпорожніший рядок таблиці в еталоні — 2.50×.
+    // Блоки тверджень (.says) навмисно повітряні, тому вони поза перевіркою.
+    let airy = 0, worst = 0;
+    s.querySelectorAll('.r, .crow').forEach(r => {
+      if (r.closest('.thead') || r.closest('.says')) return;
+      const rh = r.getBoundingClientRect().height; if (rh < 10) return;
+      let th = 0; r.querySelectorAll('*').forEach(e => {
+        if (e.children.length || !e.textContent.trim()) return;
+        const q = document.createRange(); q.selectNodeContents(e);
+        th = Math.max(th, q.getBoundingClientRect().height); });
+      if (th > 0) { const k = rh / th; worst = Math.max(worst, k); if (k > 3) airy++; } });
+    if (worst) t('рядок не порожніший за 3.0× тексту', airy === 0, `${worst.toFixed(2)}×`);
 
     // Останній дитячий елемент слайда — це виноска, а вона за правилом займає
     // смугу 980–1080 і доходить до низу слайда завжди. Тому міряти його bottom
