@@ -51,6 +51,14 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
    чого немає в прикладі, того не скопіюють. */
 .center .st{font-size:96px;line-height:1.1;max-width:1400px;margin:0;font-weight:500}
 
+/* ── 2б · червона перебивка ────────────────────────────────────────────────
+   Тло FD3433 на весь слайд. Знак тут ТІЛЬКИ білий: `SKELAR Logo white.png`
+   (довгий) або `SKELAR Symbol for red.png` (квадратний). Червона плашка на
+   червоному тлі не читається — саме це й було в живому деку. */
+.red{background:var(--accent);justify-content:center}
+.red .st{font-size:96px;line-height:1.1;max-width:1500px;margin:0;font-weight:500}
+.red .sub2{font-size:28px;line-height:1.4;max-width:900px;color:rgba(255,255,255,.82);margin:28px 0 0}
+
 /* ── 3 · адженда ───────────────────────────────────────────────────────────
    Червона шкала, номер над точкою, підпис під нею. 5+ пунктів переходять
    на другий рядок; шкала кожного рядка своя. */
@@ -142,6 +150,21 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
   <div class="chip">Серпень 2026</div>
   <div class="wordmark"><img src="content/SKELAR Logo.png" alt="SKELAR"></div>
   <p class="st">Три категорії тримають понад половину витрат у магазині</p>
+</section>
+
+<!-- 2б · червона перебивка, одна теза -->
+<section class="slide basic red">
+  <div class="wordmark"><img src="content/SKELAR Logo white.png" alt="SKELAR"></div>
+  <p class="st">Результати першого півріччя</p>
+</section>
+
+<!-- 2в · червона перебивка з підзаголовком -->
+<section class="slide basic red">
+  <div class="wordmark"><img src="content/SKELAR Logo white.png" alt="SKELAR"></div>
+  <div>
+    <p class="st">Контексти і вхідні дані</p>
+    <p class="sub2">Що ми знали на початку періоду і які припущення заклали в план на наступний.</p>
+  </div>
 </section>
 
 <!-- 3 · адженда, 4 пункти -->
