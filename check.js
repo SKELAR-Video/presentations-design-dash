@@ -46,8 +46,13 @@
     // стоять у різних x, і це не «рваний» стовпчик, а сусідні таблиці.
     let ragged = 0;
     const rows = new Map();
+    // Ключ — не тільки батько, а й лівий край із шириною. Рядки таблиці ділять
+    // і те, і те; сусідні колонки (текстові блоки, картки поруч) — ні, і раніше
+    // вони давали FAIL на власному еталоні: сітки-сусіди в одному батькові
+    // порівнювались між собою, хоча стоять пліч-о-пліч, а не одна під одною.
     [...s.querySelectorAll('[class]')].filter(e => getComputedStyle(e).display === 'grid')
-      .forEach(g => { const key = g.parentElement;
+      .forEach(g => { const b = g.getBoundingClientRect();
+        const key = `${[...s.querySelectorAll('*')].indexOf(g.parentElement)}|${Math.round(b.left)}|${Math.round(b.width)}`;
         if (!rows.has(key)) rows.set(key, []); rows.get(key).push(g); });
     [...rows.values()].forEach(group => { if (group.length < 2) return;
       const n = group[0].children.length;
@@ -84,24 +89,32 @@
       t('логотип без скруглення', round.length === 0, round[0] || '0px');
     }
 
-    // Маркер-точка має щось означати. У еталоні кружечки кодують рівень, і поруч
-    // у виносці стоїть легенда. Точка без легенди — декор, який дорисували від себе:
-    // у ТЗ його не було, а на слайді він читається як класифікація, якої немає.
+    // Маркер-точка в рядку ТАБЛИЦІ читається як класифікація, і без легенди вона
+    // бреше. Але в адженді й текстових блоках точка — вершина лінії, а не тип:
+    // це офіційні патерни, і легенди їм не треба. Перша версія цієї перевірки
+    // ловила будь-яку точку на слайді й забракувала б рівно ті типи, які бренд
+    // і малює. Тому область — тільки рядки таблиць.
     const dot = e => { const o = getComputedStyle(e), b = e.getBoundingClientRect();
       return b.width <= 24 && b.width > 3 && Math.abs(b.width-b.height) <= 2
         && /^(50%|9999px)/.test(o.borderRadius); };
-    const dots = [...s.querySelectorAll('*')].filter(e => !e.children.length && dot(e));
-    const inRows = dots.filter(e => !e.closest('.note')).length;
-    const inLegend = dots.filter(e => e.closest('.note')).length;
-    t('маркери-точки лише з легендою', inRows === 0 || inLegend > 0, `${inRows} у рядках / ${inLegend} у легенді`);
+    const dots = [...s.querySelectorAll('.panel .r, .tw .r, .col .ln')]
+      .flatMap(r => [...r.querySelectorAll('*')]).filter(e => !e.children.length && dot(e));
+    const inLegend = [...s.querySelectorAll('.note *')].filter(e => !e.children.length && dot(e)).length;
+    t('маркери в рядках таблиці лише з легендою', dots.length === 0 || inLegend > 0,
+      `${dots.length} у рядках / ${inLegend} у легенді`);
 
     // Кегль — вимір із двома межами. «Не переповнено» я перевіряю завжди, а
     // «не недовикористано» забував: рядок висотою 114px із текстом 23px виглядає
     // акуратним, хоча половина картки — порожнеча, і текст міг бути крупнішим.
     // Поріг 3.0 узятий із виміру: найпорожніший рядок таблиці в еталоні — 2.50×.
     // Блоки тверджень (.says) навмисно повітряні, тому вони поза перевіркою.
+    // Далі — тільки для слайдів з даними (.slide.data). На перебивці, адженді й
+    // текстових блоках порожнеча внизу — задум, а не недоробка: там заповнювати
+    // до 980 не треба, і рядків таблиці немає. Профіль вибирається класом слайда.
+    const isData = s.classList.contains('data') || !s.classList.contains('basic');
+
     let airy = 0, worst = 0;
-    s.querySelectorAll('.r, .crow').forEach(r => {
+    if (isData) s.querySelectorAll('.r, .crow').forEach(r => {
       if (r.closest('.thead') || r.closest('.says')) return;
       const rh = r.getBoundingClientRect().height; if (rh < 10) return;
       let th = 0; r.querySelectorAll('*').forEach(e => {
@@ -117,12 +130,14 @@
     // навіть тоді, коли контент закінчувався на 891. Міряємо низ найнижчої
     // картки поза виноскою — саме її й просить правило «заповнити до 980».
     let fill = 0;
-    s.querySelectorAll(BOX).forEach(e => { if (e.closest('.note')) return;
-      fill = Math.max(fill, e.getBoundingClientRect().bottom - S.top); });
-    if (!fill) [...s.querySelectorAll(TXT)].forEach(e => {   // слайд без карток
-      if (e.children.length || !e.textContent.trim() || e.closest('.note')) return;
-      fill = Math.max(fill, ink(e).bottom - S.top); });
-    t('контент доходить до 980', Math.round(fill) >= 960, Math.round(fill));
+    if (isData) {
+      s.querySelectorAll(BOX).forEach(e => { if (e.closest('.note')) return;
+        fill = Math.max(fill, e.getBoundingClientRect().bottom - S.top); });
+      if (!fill) [...s.querySelectorAll(TXT)].forEach(e => {   // слайд без карток
+        if (e.children.length || !e.textContent.trim() || e.closest('.note')) return;
+        fill = Math.max(fill, ink(e).bottom - S.top); });
+      t('контент доходить до 980', Math.round(fill) >= 960, Math.round(fill));
+    }
 
     console.log(`── слайд ${i + 1}\n   ` + say.join('\n   '));
   });

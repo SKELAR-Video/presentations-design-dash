@@ -1,0 +1,172 @@
+<meta charset="utf-8"><title>SKELAR — еталон базових типів слайдів</title>
+<style>
+html{background:#05070E} body{margin:0} .stage{zoom:0.62}
+:root{
+ --ink0:#0F131D;   /* фон слайда */
+ --ink1:#1C202B;   /* картка-контейнер */
+ --ink2:#292D39;   /* шапка, піднята поверхня, чип */
+ --ink3:#343945;   /* доріжка, межа картки */
+ --line:#414653;   /* розділювачі */
+ --dim:#6E737F;    /* третій рівень тексту */
+ --mut:#A2A6B1;    /* другий рівень тексту */
+ --txt:#FFFFFF;
+ --accent:#FD3433; /* бренд, не оцінка */
+}
+.slide{width:1920px;height:1080px;box-sizing:border-box;padding:100px;margin:0 auto 40px;
+ background:var(--ink0);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:52px;
+ font-family:Inter,"Inter Variable",system-ui,sans-serif;font-weight:500;font-variation-settings:'wght' 500;
+ font-synthesis:none;color:var(--txt);line-height:1.19;-webkit-font-smoothing:antialiased}
+
+/* Логотип — знак із файлу, гострі кути, ніякого border-radius.
+   У згенерованому деку src замінюється на data: URI, щоб файл був самодостатнім. */
+.logo{position:absolute;left:1730px;top:100px;width:90px;height:90px}
+.logo img{display:block;width:100%;height:100%}
+.wordmark{position:absolute;left:1610px;top:100px;height:56px}
+.wordmark img{display:block;height:100%;width:auto}
+
+.h1{width:1500px;font-size:72px;line-height:1.15;margin:0}
+.h1.big{font-size:88px}
+
+/* ── 1 · обкладинка ────────────────────────────────────────────────────────
+   Фон-фотографія, затемнення знизу, назва в лівому нижньому кутку. */
+.cover{padding:0;justify-content:flex-end}
+.cover .bg{position:absolute;inset:0}
+.cover .bg img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .shade{position:absolute;inset:0;
+ background:linear-gradient(180deg,rgba(15,19,29,.35) 0%,rgba(15,19,29,.15) 45%,rgba(15,19,29,.92) 100%)}
+.cover .body{position:relative;padding:100px;display:flex;flex-direction:column;gap:34px}
+.cover .h1{font-size:120px;line-height:1.08;width:1500px}
+.cover .meta{font-size:28px;color:var(--mut)}
+
+/* ── 2 · перебивка (центральна виключка) ───────────────────────────────────
+   Дата-чип ліворуч, знак праворуч, теза по центру. Порожнеча тут — задум. */
+.center{justify-content:center;align-items:center;text-align:center}
+.chip{position:absolute;left:100px;top:100px;background:var(--ink2);color:var(--mut);
+ border-radius:14px;padding:14px 26px;font-size:24px}
+.center .st{font-size:96px;line-height:1.1;max-width:1400px;margin:0}
+.center .st em{font-style:normal;color:var(--accent)}
+
+/* ── 3 · адженда ───────────────────────────────────────────────────────────
+   Червона шкала, номер над точкою, підпис під нею. 5+ пунктів переходять
+   на другий рядок; шкала кожного рядка своя. */
+.tl{display:flex;flex-direction:column;gap:64px;margin-top:40px}
+.tl-row{display:grid;gap:40px;position:relative}
+.tl-row::before{content:'';position:absolute;left:0;right:0;top:38px;height:2px;background:var(--accent)}
+.tl-i{position:relative;padding-top:0}
+.tl-i .n{font-size:26px;color:var(--mut)}
+.tl-i .d{width:20px;height:20px;border-radius:50%;background:var(--accent);margin:8px 0 18px;position:relative;z-index:1}
+.tl-i .l{font-size:24px;line-height:1.25;color:var(--txt);max-width:300px}
+
+/* ── 4 · текстові блоки ────────────────────────────────────────────────────
+   Точка на вершині вертикальної червоної лінії, текст праворуч від неї.
+   Дві колонки — кегль 30, три — 24. */
+.tb{display:grid;gap:60px;flex:1 1 auto;min-height:0;align-content:start;margin-top:20px}
+.tb.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tb.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tb-i{display:grid;grid-template-columns:20px minmax(0,1fr);gap:22px;position:relative}
+.tb-i .rail{width:20px}
+.tb-i .rail i{display:block;width:20px;height:20px;border-radius:50%;background:var(--accent)}
+.tb-i .rail s{display:block;width:2px;height:430px;background:var(--accent);margin-left:9px;text-decoration:none}
+.tb.c2 .tb-i .t{font-size:30px;line-height:1.3}
+.tb.c3 .tb-i .t{font-size:24px;line-height:1.3}
+
+/* ── 5 · нумеровані блоки ──────────────────────────────────────────────────
+   Картка з номером над текстом. Радіус картки 22px — на картці він є,
+   на логотипі його немає ніколи. */
+.nb{display:grid;gap:30px;margin-top:20px}
+.nb.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.nb-i{background:var(--ink1);border:1px solid var(--ink3);border-radius:22px;padding:34px;
+ display:flex;flex-direction:column;gap:14px;min-height:300px}
+.nb-i .n{font-size:44px;line-height:1}
+.nb-i .t{font-size:26px;line-height:1.3;color:var(--mut)}
+
+.note{position:absolute;left:100px;right:100px;top:980px;height:100px;margin:0;
+ display:flex;align-items:center;gap:40px;font-size:19px;color:var(--dim)}
+</style>
+
+<div class="stage">
+
+<!-- 1 · обкладинка -->
+<section class="slide basic cover">
+  <div class="bg"><img src="content/backgrounds/Mountain 2.jpg" alt=""></div>
+  <div class="shade"></div>
+  <div class="wordmark"><img src="content/SKELAR Logo.png" alt="SKELAR"></div>
+  <div class="body">
+    <h1 class="h1">Категорії застосунків для iPhone</h1>
+    <div class="meta">Серпень 2026 · внутрішній огляд</div>
+  </div>
+</section>
+
+<!-- 2 · перебивка -->
+<section class="slide basic center">
+  <div class="chip">Серпень 2026</div>
+  <div class="wordmark"><img src="content/SKELAR Logo.png" alt="SKELAR"></div>
+  <p class="st">Три категорії тримають <em>понад половину</em> витрат у магазині</p>
+</section>
+
+<!-- 3 · адженда, 4 пункти -->
+<section class="slide basic">
+  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
+  <div><h1 class="h1">Адженда</h1></div>
+  <div class="tl">
+    <div class="tl-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+      <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків і навіщо вони потрібні</div></div>
+      <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує в магазині</div></div>
+      <div class="tl-i"><div class="n">03</div><div class="d"></div><div class="l">Магазин у цифрах</div></div>
+      <div class="tl-i"><div class="n">04</div><div class="d"></div><div class="l">Найпопулярніші категорії застосунків</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · адженда, 6 пунктів у два рядки -->
+<section class="slide basic">
+  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
+  <div><h1 class="h1">Адженда</h1></div>
+  <div class="tl">
+    <div class="tl-row" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків і навіщо вони потрібні</div></div>
+      <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує в магазині</div></div>
+      <div class="tl-i"><div class="n">03</div><div class="d"></div><div class="l">Магазин у цифрах</div></div>
+    </div>
+    <div class="tl-row" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="tl-i"><div class="n">04</div><div class="d"></div><div class="l">Найпопулярніші категорії застосунків</div></div>
+      <div class="tl-i"><div class="n">05</div><div class="d"></div><div class="l">Три категорії-лідери за доходом</div></div>
+      <div class="tl-i"><div class="n">06</div><div class="d"></div><div class="l">Чому користувачі повертаються: звички та утримання</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · текстові блоки, три колонки -->
+<section class="slide basic">
+  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
+  <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
+  <div class="tb c3">
+    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Чому користувачі повертаються: звички та утримання</div></div>
+    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Що тримає категорію в топі роками, а не один сезон</div></div>
+    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Де закінчується зростання і починається утримання</div></div>
+  </div>
+</section>
+
+<!-- 6 · текстові блоки, дві колонки, кегль крупніший -->
+<section class="slide basic">
+  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
+  <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
+  <div class="tb c2">
+    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Чому користувачі повертаються: звички та утримання</div></div>
+    <div class="tb-i"><div class="rail"><i></i><s></s></div><div class="t">Що тримає категорію в топі роками, а не один сезон</div></div>
+  </div>
+</section>
+
+<!-- 7 · нумеровані блоки -->
+<section class="slide basic">
+  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
+  <div><h1 class="h1">Три категорії, що ведуть за доходом</h1></div>
+  <div class="nb n3">
+    <div class="nb-i"><div class="n">01</div><div class="t">Ігри — понад половина всіх витрат у магазині</div></div>
+    <div class="nb-i"><div class="n">02</div><div class="t">Підписки — стримінг, музика та хмарні сервіси</div></div>
+    <div class="nb-i"><div class="n">03</div><div class="t">Продуктивність — інструменти для роботи й навчання</div></div>
+  </div>
+  <div class="note"><span>Приклад даних</span></div>
+</section>
+
+</div>
