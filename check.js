@@ -73,8 +73,14 @@
       // і межа картки це теж «щось». Для заголовка й виноски лишається ink:
       // їхній бокс — на всю ширину слайда, і по ньому вимір безглуздий.
       const lb = L.getBoundingClientRect(); let g = Infinity;
+      // Картки міряються по краю, текст — по намальованому. Раніше в тексті
+      // рахувались тільки h1 і виноска: логотип міг стати впритул до будь-якого
+      // іншого підпису, і перевірка мовчала. Тепер беруться всі листові вузли
+      // з текстом, незалежно від того, якими класами їх назвали.
       const near = [...s.querySelectorAll(BOX)].map(e => e.getBoundingClientRect())
-        .concat([...s.querySelectorAll('h1,.note')].map(e => ink(e)));
+        .concat([...s.querySelectorAll(TXT)]
+          .filter(e => !e.children.length && e.textContent.trim() && !L.contains(e))
+          .map(e => ink(e)));
       near.forEach(b => {
         const dx = Math.max(lb.left-b.right, b.left-lb.right, 0), dy = Math.max(lb.top-b.bottom, b.top-lb.bottom, 0);
         g = Math.min(g, Math.max(dx, dy)); });
@@ -88,6 +94,17 @@
         .filter(v => v && v !== '0px' && v !== '0%');
       t('логотип без скруглення', round.length === 0, round[0] || '0px');
     }
+
+    // Червоний — колір поверхонь (знак, шкала, точка, кружечок), не тексту.
+    // Словесне правило тут не тримає: «я не оцінюю, я виділяю» — і його вже
+    // обійшли. Тому вимір: жоден листовий вузол з текстом не має червоного
+    // кольору. Фон червоним бути може — біла цифра на червоному колі законна.
+    const red = c => { const m = c.match(/\d+/g); if (!m) return false;
+      const [r, g, b] = m.map(Number); return r > 150 && r > g * 1.8 && r > b * 1.8; };
+    const redText = [...s.querySelectorAll(TXT)]
+      .filter(e => !e.children.length && e.textContent.trim() && red(getComputedStyle(e).color));
+    t('текст не пофарбований у червоне', redText.length === 0,
+      redText.length ? `${redText.length}: «${redText[0].textContent.trim().slice(0, 24)}»` : 0);
 
     // Маркер-точка в рядку ТАБЛИЦІ читається як класифікація, і без легенди вона
     // бреше. Але в адженді й текстових блоках точка — вершина лінії, а не тип:

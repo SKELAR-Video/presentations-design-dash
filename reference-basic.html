@@ -20,6 +20,9 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 /* Логотип — знак із файлу, гострі кути, ніякого border-radius.
    У згенерованому деку src замінюється на data: URI, щоб файл був самодостатнім. */
 .logo{position:absolute;left:1730px;top:100px;width:90px;height:90px}
+/* Друга й остання дозволена позиція: лівий низ. Береться тоді, коли правий
+   верх зайнятий контентом — саме так зроблено в офіційному макеті цього типу. */
+.logo.bl{left:100px;top:auto;bottom:100px}
 .logo img{display:block;width:100%;height:100%}
 .wordmark{position:absolute;left:1610px;top:100px;height:56px}
 .wordmark img{display:block;height:100%;width:auto}
@@ -43,8 +46,10 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 .center{justify-content:center;align-items:center;text-align:center}
 .chip{position:absolute;left:100px;top:100px;background:var(--ink2);color:var(--mut);
  border-radius:14px;padding:14px 26px;font-size:24px}
+/* Текст тут не фарбується. Правило про червоний я вже раз обійшов саме тут —
+   виділив слово акцентом. Класу для червоного тексту в еталоні немає навмисно:
+   чого немає в прикладі, того не скопіюють. */
 .center .st{font-size:96px;line-height:1.1;max-width:1400px;margin:0}
-.center .st em{font-style:normal;color:var(--accent)}
 
 /* ── 3 · адженда ───────────────────────────────────────────────────────────
    Червона шкала, номер над точкою, підпис під нею. 5+ пунктів переходять
@@ -80,6 +85,41 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 .nb-i .n{font-size:44px;line-height:1}
 .nb-i .t{font-size:26px;line-height:1.3;color:var(--mut)}
 
+/* ── 6 · фото на пів екрана ────────────────────────────────────────────────
+   Ліворуч заголовок і нумерований список, праворуч фото до самого краю
+   слайда. Логотипа тут немає: фото підходить упритул, охоронного поля
+   не лишається — правило каже не ставити взагалі, а не зменшувати. */
+.half{padding:0;flex-direction:row;gap:0}
+.half .side{width:960px;flex:none;padding:100px;display:flex;flex-direction:column;gap:52px;box-sizing:border-box}
+.half .pic{flex:1 1 auto;min-width:0}
+.half .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.half .h1{width:auto;font-size:56px}
+
+/* нумерований список: червоне коло, біла цифра, текст праворуч */
+.nlist{display:flex;flex-direction:column;gap:34px}
+.nli{display:grid;grid-template-columns:34px minmax(0,1fr);gap:20px;align-items:start}
+.nli b{font-weight:500;width:34px;height:34px;border-radius:50%;background:var(--accent);
+ color:var(--txt);font-size:17px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.nli .t{font-size:24px;line-height:1.3;color:var(--mut)}
+
+/* ── 7 · картки з абзацом ──────────────────────────────────────────────────
+   Той самий блок, що й нумерований, але текст довший за рядок. 2, 3 або 4
+   картки; більше чотирьох у цей тип не кладеться. */
+.cards{display:grid;gap:30px;flex:1 1 auto;min-height:0;align-content:start;margin-top:20px}
+.cards.k2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cards.k3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cards.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--ink1);border:1px solid var(--ink3);border-radius:22px;padding:34px;
+ font-size:22px;line-height:1.35;color:var(--mut);min-height:300px}
+.cards.k2 .card{font-size:26px}
+
+/* ── 8 · заголовок ліворуч, стос карток праворуч ───────────────────────────
+   Для 2–4 тез, коли заголовок довгий і має триматись окремо. */
+.split{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:60px}
+.split .lead{font-size:72px;line-height:1.15;align-self:start}
+.split .stack{display:flex;flex-direction:column;gap:24px}
+.split .card{min-height:0;flex:1 1 auto;display:flex;align-items:center}
+
 .note{position:absolute;left:100px;right:100px;top:980px;height:100px;margin:0;
  display:flex;align-items:center;gap:40px;font-size:19px;color:var(--dim)}
 </style>
@@ -101,7 +141,7 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 <section class="slide basic center">
   <div class="chip">Серпень 2026</div>
   <div class="wordmark"><img src="content/SKELAR Logo.png" alt="SKELAR"></div>
-  <p class="st">Три категорії тримають <em>понад половину</em> витрат у магазині</p>
+  <p class="st">Три категорії тримають понад половину витрат у магазині</p>
 </section>
 
 <!-- 3 · адженда, 4 пункти -->
@@ -167,6 +207,55 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
     <div class="nb-i"><div class="n">03</div><div class="t">Продуктивність — інструменти для роботи й навчання</div></div>
   </div>
   <div class="note"><span>Приклад даних</span></div>
+</section>
+
+<!-- 8 · фото на пів екрана з нумерованим списком -->
+<section class="slide basic half">
+  <div class="side">
+    <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
+    <div class="nlist">
+      <div class="nli"><b>1</b><div class="t">Ігри — понад половина всіх витрат у магазині</div></div>
+      <div class="nli"><b>2</b><div class="t">Підписки — стримінг, музика та хмарні сервіси</div></div>
+      <div class="nli"><b>3</b><div class="t">Продуктивність — інструменти для роботи й навчання</div></div>
+    </div>
+  </div>
+  <div class="pic"><img src="content/half screen photos/2.jpg" alt=""></div>
+</section>
+
+<!-- 9 · картки з абзацом, три -->
+<section class="slide basic">
+  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
+  <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
+  <div class="cards k3">
+    <div class="card">Створити продукт із хорошою юніт-економікою та стабільним revenue — це лише перший крок.</div>
+    <div class="card">Далі починається інше питання: чи лишиться цей продукт потрібним через десять років.</div>
+    <div class="card">Ми прагнемо зробити так, щоб наші бізнеси лишались актуальними через 10, 20 чи 50 років.</div>
+  </div>
+</section>
+
+<!-- 10 · картки з абзацом, чотири — межа цього типу -->
+<section class="slide basic">
+  <div class="logo"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
+  <div><h1 class="h1">Поговоримо про «бізнеси на століття»?</h1></div>
+  <div class="cards k4">
+    <div class="card">Створити продукт із хорошою юніт-економікою — це лише перший крок.</div>
+    <div class="card">Далі питання, чи лишиться продукт потрібним через десять років.</div>
+    <div class="card">Звички користувачів змінюються повільніше, ніж технології довкола них.</div>
+    <div class="card">Тому ми міряємо утримання, а не тільки зростання за квартал.</div>
+  </div>
+</section>
+
+<!-- 11 · заголовок ліворуч, стос карток праворуч -->
+<section class="slide basic">
+  <div class="logo bl"><img src="content/SKELAR Symbol.png" alt="SKELAR"></div>
+  <div class="split">
+    <div class="lead">Три категорії, що ведуть за доходом</div>
+    <div class="stack">
+      <div class="card">Ігри — понад половина всіх витрат у магазині</div>
+      <div class="card">Підписки — стримінг, музика та хмарні сервіси</div>
+      <div class="card">Продуктивність — інструменти для роботи й навчання</div>
+    </div>
+  </div>
 </section>
 
 </div>
