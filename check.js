@@ -95,6 +95,25 @@
       t('логотип без скруглення', round.length === 0, round[0] || '0px');
     }
 
+    // Асети. Дві помилки, які я зробив сам і які доїхали в живий дек:
+    // 1) знак був намальований clip-path-полігоном — тобто перемальований, хоч
+    //    правило каже брати рівно той файл, що дано;
+    // 2) шляхи були відносні (content/...) — поза репозиторієм картинок немає,
+    //    і в деку логотипи просто зникли.
+    // Тому: логотип — це <img>, і жоден src не буває відносним.
+    if (L) {
+      const im = L.querySelector('img');
+      t('логотип — файл, а не намальований', !!im,
+        im ? 'img' : `<${L.tagName.toLowerCase()}> без img`);
+      if (im) t('знак не перефарбований і не обрізаний фігурою',
+        getComputedStyle(im).clipPath === 'none' && getComputedStyle(L).clipPath === 'none',
+        getComputedStyle(im).clipPath);
+    }
+    const badSrc = [...s.querySelectorAll('img')]
+      .filter(e => { const v = e.getAttribute('src') || ''; return !/^(data:|https?:)/.test(v); });
+    t('усі картинки вбудовані або за абсолютним посиланням', badSrc.length === 0,
+      badSrc.length ? `${badSrc.length}: «${badSrc[0].getAttribute('src').slice(0, 34)}»` : 0);
+
     // Bold заборонений, і саме тут я двічі проґавив своє. `h1` у браузера має
     // власне `font-weight:bold`, а успадкований 500 зі слайда його НЕ перебиває:
     // спадкування слабше за правило UA на самому елементі. Тому кожен заголовок
