@@ -67,6 +67,14 @@
         const dx = Math.max(lb.left-b.right, b.left-lb.right, 0), dy = Math.max(lb.top-b.bottom, b.top-lb.bottom, 0);
         g = Math.min(g, Math.max(dx, dy)); });
       t('охоронне поле логотипа ≥50px', g >= 50, Math.round(g));
+
+      // Скруглення логотипа — дефект, який видно оком, але оком його й пропускають:
+      // на темному фоні різниця між квадратом і r=18px читається як «просто іконка».
+      // Знак у файлі має гострі кути, і жодна підкладка не має права їх округляти.
+      const round = [L, ...L.querySelectorAll('*')]
+        .map(e => getComputedStyle(e).borderRadius)
+        .filter(v => v && v !== '0px' && v !== '0%');
+      t('логотип без скруглення', round.length === 0, round[0] || '0px');
     }
 
     // Останній дитячий елемент слайда — це виноска, а вона за правилом займає
