@@ -84,7 +84,11 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
    текст 48 сірий, вертикально по центру. Висота картки вільна — тягнеться
    на всю смугу; при довгому тексті кегль опускається, а не картка росте. */
 .band{position:absolute;left:var(--pad);top:500px;width:var(--w);height:480px;
- display:flex;gap:30px;align-items:stretch}
+ display:grid;grid-template-columns:repeat(var(--c,3),minmax(0,1fr));grid-auto-rows:1fr;gap:30px}
+/* Два ряди карток: рядок 329, проміжок 30, низ так само на 980 — числа з
+   макета Bento 6. Більше шести карток у смугу не кладеться: сьома робить
+   рядок нижчим за два рядки тексту. */
+.band.r2{top:292px;height:688px}
 .card{background:var(--card);border-radius:var(--r);padding:var(--cp);box-sizing:border-box;
  flex:1 1 0;min-width:0;display:flex;align-items:flex-start;
  font-size:var(--cs,48px);line-height:1.18;color:var(--mut)}
@@ -229,7 +233,7 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 <section class="slide basic">
   <div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
   <h1 class="h1">Поговоримо про «бізнеси на століття»?</h1>
-  <div class="band">
+  <div class="band" style="--c:3">
     <div class="card">Створити продукт із хорошою юніт-економікою — це лише перший крок</div>
     <div class="card">Далі питання, чи лишиться він потрібним через десять років</div>
     <div class="card">Звички змінюються повільніше, ніж технології довкола</div>
@@ -240,7 +244,7 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 <section class="slide basic" style="--cs:38px">
   <div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
   <h1 class="h1">Поговоримо про «бізнеси на століття»?</h1>
-  <div class="band">
+  <div class="band" style="--c:4">
     <div class="card">Створити продукт із хорошою юніт-економікою та стабільним revenue — це лише перший крок на довгій дистанції</div>
     <div class="card">Далі починається інше питання: чи лишиться цей продукт потрібним людям через десять або двадцять років</div>
     <div class="card">Звички користувачів змінюються значно повільніше, ніж технології довкола них, і це працює на нас</div>
@@ -252,10 +256,26 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 <section class="slide basic">
   <div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
   <h1 class="h1">Три категорії, що ведуть за доходом</h1>
-  <div class="band">
+  <div class="band" style="--c:3">
     <div class="card num"><b>01</b><span>Ігри — понад половина всіх витрат у магазині</span></div>
     <div class="card num"><b>02</b><span>Підписки — стримінг, музика та хмарні сервіси</span></div>
     <div class="card num"><b>03</b><span>Продуктивність — інструменти для роботи й навчання</span></div>
+  </div>
+</section>
+
+
+<!-- 7б · Bento 6 — шість карток у два ряди по три. Тип не вигаданий: у
+     бібліотеці він є (Bento 6), і числа взяті звідти. -->
+<section class="slide basic" style="--cs:38px">
+  <div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
+  <h1 class="h1">Три категорії</h1>
+  <div class="band r2" style="--c:3">
+    <div class="card">Створити продукт із хорошою юніт-економікою та стабільним revenue — це лише перший крок</div>
+    <div class="card">Чи лишиться цей продукт потрібним людям через десять або двадцять років</div>
+    <div class="card">Звички користувачів змінюються повільніше, ніж технології довкола них</div>
+    <div class="card">Ми міряємо утримання, а не тільки зростання за квартал</div>
+    <div class="card">Стежимо, як змінюється вартість залучення в кожній категорії</div>
+    <div class="card">Перевіряємо, чи не вигорає аудиторія від частоти сповіщень</div>
   </div>
 </section>
 
