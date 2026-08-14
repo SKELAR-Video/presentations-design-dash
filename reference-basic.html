@@ -36,11 +36,11 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
    і тоді його низ лягає рівно на 980. Довгий 357.5×90 — тільки на перебивці.
    Кути гострі: жодного border-radius. Вага на всіх заголовках — явно 500,
    бо успадкована не перебиває браузерний bold на h1. */
-.logo{position:absolute;z-index:3;left:1730px;top:100px;width:90px;height:90px}
-.logo.bl{left:100px;top:auto;bottom:100px}
+.logo{position:absolute;z-index:3;right:100px;top:100px;width:90px;height:90px}
+.logo.bl{right:auto;left:100px;top:auto;bottom:100px}
 .logo img{display:block;width:100%;height:100%}
 
-.wordmark{position:absolute;z-index:3;left:1463px;top:100px;width:357.488px;height:90px}
+.wordmark{position:absolute;z-index:3;right:100px;top:100px;width:357.488px;height:90px}
 .wordmark img{display:block;width:100%;height:100%}
 
 .h1{position:absolute;z-index:2;left:var(--pad);top:var(--pad);margin:0;font-weight:500;
@@ -73,9 +73,13 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
    штовхають його вниз і слайд виростає за 1080 — саме це сталося в живому деку. */
 .tl.two{top:auto;bottom:100px;gap:56px}
 .tl-row{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:81px;position:relative}
-.tl-row::before{content:'';position:absolute;top:84px;height:3px;background:var(--accent);left:27px;
+/* Лінія проходить рівно через центр кружечків, і це рахується з тих самих
+   значень, що й самі кружечки: висота номера + відступ + половина кола.
+   Раніше тут стояло магічне top:84 — лінія йшла на 20px вище центрів. */
+.tl-row::before{content:'';position:absolute;top:calc(57px + 22px + 27px - 1.5px);height:3px;background:var(--accent);left:27px;
  width:calc((var(--f) - 1) * ((100% - (var(--n) - 1)*81px)/var(--n) + 81px))}
-.tl-i .n{font-size:48px;color:var(--mut);line-height:1.18}
+.tl-i{--nh:57px}                       /* висота рядка з номером: 48 × 1.18 */
+.tl-i .n{font-size:48px;color:var(--mut);line-height:1.18;height:var(--nh)}
 .tl-i .d{width:54px;height:54px;border-radius:50%;background:var(--accent);margin:22px 0 39px;position:relative;z-index:1}
 .tl-i .l{font-size:36px;line-height:1.18}
 

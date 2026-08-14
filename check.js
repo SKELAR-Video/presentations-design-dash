@@ -161,6 +161,62 @@
     t('текст не накритий іншим елементом', covered.length === 0, covered.length
       ? `${covered.length}: «${covered[0].textContent.trim().slice(0, 24)}»` : 0);
 
+    // Ніщо не вилазить за поле. Логотип у живому деку виїхав за правий край
+    // і обрізався краєм слайда — у коді це виглядає нормально, бо бокс на місці,
+    // просто стоїть на 300px правіше. Фон і затемнення на весь слайд — виняток.
+    const bleed = e => e.classList.contains('pic') || e.classList.contains('shade')
+      || e.classList.contains('slide') || e.classList.contains('stage');
+    const outside = [...s.querySelectorAll('.logo, .wordmark, .chip, .card, .kpi, .panel, .tw, .col, .tl-row, .cols, .subs, .rails, .bul, .h1, .st')]
+      .filter(e => !bleed(e))
+      .filter(e => { const b = e.getBoundingClientRect();       // сховане не міряємо:
+        return b.width > 0 && b.height > 0; })                  // у display:none нулі
+      .filter(e => { const b = e.getBoundingClientRect();
+        return b.left < S.left + 99 || b.right > S.right - 99 || b.top < S.top + 99 || b.bottom > S.top + 981; });
+    t('нічого не виходить за поле 100', outside.length === 0, outside.length
+      ? `${outside.length}: .${String(outside[0].className).split(' ')[0]} до ${Math.round(outside[0].getBoundingClientRect().right - S.left)}` : 0);
+
+    // Заголовок і контент не налазять один на одного. Блоки стоять на фіксованих
+    // координатах, а заголовок росте вниз: три рядки замість одного — і кружечок
+    // сідає просто на літери. Правильна реакція — опустити кегль заголовка зі
+    // шкали, а не зсунути блок: тоді ламається сітка всіх інших слайдів.
+    const H = s.querySelector('.h1, .st');
+    if (H && H.getBoundingClientRect().height) {
+      const hb = ink(H);
+      const hit = [...s.querySelectorAll('.tl, .cols, .subs, .rails, .bul, .band, .right, .circ, .card, .kpi, .panel')]
+        .map(e => e.getBoundingClientRect())
+        .filter(b => b.width && b.height
+          && b.left < hb.right + 20 && b.right > hb.left - 20
+          && b.top < hb.bottom + 20 && b.bottom > hb.top - 20);
+      t('заголовок не налазить на контент', hit.length === 0, hit.length
+        ? `перекриття ${Math.round(hb.bottom - hit[0].top)}px` : 0);
+    }
+
+    // Числа в одній сітці KPI мають однаковий кегль — його задає найдовше число,
+    // а не кожна картка окремо. І цей кегль мусить бути найбільшим, який влазить:
+    // «$31 770» на 72px займав 277 із 347 доступних, тобто 70 пікселів простою.
+    const grids = new Map();
+    s.querySelectorAll('.kv2').forEach(e => { const k = e.closest('.kpis') || e.parentElement.parentElement;
+      if (!grids.has(k)) grids.set(k, []); grids.get(k).push(e); });
+    grids.forEach(list => {
+      const sizes = new Set(list.map(e => Math.round(parseFloat(getComputedStyle(e).fontSize))));
+      t('кегль числа однаковий у всій сітці', sizes.size <= 1, [...sizes].join(' / '));
+      // Порівнюємо кожне число з ЙОГО карткою і беремо найзаповненіше: якщо
+      // найдовше число використало менш як 60% своєї картки, кегль занизький.
+      // Спершу я міряв проти найширшої картки в сітці — на змішаних розкладках
+      // це давало 25% там, де все гаразд.
+      // Картка-рядок (число і підпис в один рядок) має іншу геометрію: там
+      // число законно займає меншу частку ширини. Її з цієї перевірки виводимо.
+      let best = 0, info = '';
+      list.forEach(e => { const c = e.closest('[class*=kpi]'); if (!c) return;
+        if (c.classList.contains('row')) return;
+        const r = ink(e), cb = c.getBoundingClientRect(), cs = getComputedStyle(c);
+        const room = cb.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        const k = (r.right - r.left) / room;
+        if (k > best) { best = k; info = `${Math.round(r.right - r.left)} з ${Math.round(room)}`; } });
+      if (best) t('найдовше число використовує ≥60% ширини картки', best >= 0.6,
+        `${info} = ${Math.round(100 * best)}%`);
+    });
+
     // Bold заборонений, і саме тут я двічі проґавив своє. `h1` у браузера має
     // власне `font-weight:bold`, а успадкований 500 зі слайда його НЕ перебиває:
     // спадкування слабше за правило UA на самому елементі. Тому кожен заголовок
