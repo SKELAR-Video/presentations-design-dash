@@ -3,6 +3,14 @@
    Кожен рядок — вимір, а не думка. FAIL означає, що слайд показувати ще рано. */
 (() => {
   const st = document.querySelector('.stage'); if (st) st.style.zoom = 1;
+  // Розпірка в кінець документа. Без неї останні слайди неможливо прокрутити
+  // під верх кадру — сторінка вже закінчилась, слайд лишається вище, і
+  // elementFromPoint міряє контент СУСІДНЬОГО слайда. Саме так перевірка на
+  // перекриття звинуватила таблицю в тому, що її шапку накриває заголовок,
+  // який належав іншому слайду.
+  const spacer = document.createElement('div');
+  spacer.style.height = '1200px'; spacer.setAttribute('data-check-spacer', '');
+  (st || document.body).appendChild(spacer);
   const ink = el => { const r = document.createRange(); r.selectNodeContents(el);
     const rs = [...r.getClientRects()]; if (!rs.length) return el.getBoundingClientRect();
     return { left: Math.min(...rs.map(x=>x.left)), right: Math.max(...rs.map(x=>x.right)),
@@ -151,12 +159,46 @@
     // Текст, накритий фоном. `.pic` і `.shade` абсолютні, а блок із заголовком
     // був звичайним — позиціоновані сусіди малюються поверх, і на слайді
     // просто немає тексту, хоча в коді він є. Питаємо браузер, хто зверху.
+    // Перекриття рахується геометрично, без elementFromPoint: той бачить лише
+    // вікно, а на останніх слайдах кадр не доходить і він міряє чужий слайд.
+    // Правила накладання: вищий z-index; при однаковому — позиціонований поверх
+    // звичайного (саме так фото накрило заголовок), а далі — порядок у DOM.
+    // Шар елемента задає не він сам, а найближчий предок із власним z-index:
+    // текст усередині .tt{z-index:2} має z-index auto, і порівнювати треба
+    // саме двійку. Інакше затемнення з z-index:1 «накриває» заголовок, який
+    // насправді лежить над ним.
+    const zOf = e => { for (let a = e; a && a !== s.parentElement; a = a.parentElement) {
+        const z = getComputedStyle(a).zIndex; if (z !== 'auto') return +z; } return 0; };
+    const posed = e => getComputedStyle(e).position !== 'static';
+    const solid = a => { const o = getComputedStyle(a);
+      return (o.backgroundColor && o.backgroundColor !== 'rgba(0, 0, 0, 0)')
+        || a.tagName === 'IMG' || !!a.querySelector('img'); };
+    const above = (a, e) => {
+      const za = zOf(a), ze = zOf(e);
+      if (za !== ze) return za > ze;
+      if (posed(a) !== posed(e)) return posed(a);
+      return !!(a.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_PRECEDING);
+    };
+    // Список «щільних» елементів і їхні прямокутники рахуються ОДИН раз:
+    // раніше кожен текстовий вузол перебирав усі елементи слайда, і на таблиці
+    // з трьохсот вузлів це давало десятки тисяч замірів — перевірка не встигала
+    // за дві хвилини.
+    const solids = [...s.querySelectorAll('*')].filter(solid)
+      .map(a => ({ a, b: a.getBoundingClientRect(), z: zOf(a), p: posed(a) }))
+      .filter(o => o.b.width > 8 && o.b.height > 8);
     const covered = [...s.querySelectorAll(TXT)].filter(e => {
       if (e.children.length || !e.textContent.trim()) return false;
-      const r = ink(e); const x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2;
+      const r = ink(e);
       if (r.right - r.left < 4 || r.bottom - r.top < 4) return false;
-      const top = document.elementFromPoint(x, y);
-      return top && top !== e && !e.contains(top) && !top.contains(e);
+      const cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
+      const ez = zOf(e), ep = posed(e);
+      return solids.some(({ a, b, z, p }) => {
+        if (a === e || a.contains(e) || e.contains(a)) return false;
+        if (!(b.left <= cx && cx <= b.right && b.top <= cy && cy <= b.bottom)) return false;
+        if (z !== ez) return z > ez;
+        if (p !== ep) return p;
+        return !!(a.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_PRECEDING);
+      });
     });
     t('текст не накритий іншим елементом', covered.length === 0, covered.length
       ? `${covered.length}: «${covered[0].textContent.trim().slice(0, 24)}»` : 0);
@@ -335,5 +377,6 @@
 
     console.log(`── слайд ${i + 1}\n   ` + say.join('\n   '));
   });
+  spacer.remove();
   console.log(fails === 0 ? '\n✅ усі перевірки зелені' : `\n❌ ${fails} FAIL — показувати ще рано`);
 })();
