@@ -57,7 +57,11 @@
     [...rows.values()].forEach(group => { if (group.length < 2) return;
       const n = group[0].children.length;
       for (let c = 0; c < n; c++) {
-        const xs = new Set(group.map(g => g.children[c] && Math.round(g.children[c].getBoundingClientRect().left)));
+        // Порівнюємо тільки заповнені клітинки. Недозаповнений останній рядок —
+        // це норма (адженда на 6 у сітці на 4), а не рваний край: раніше
+        // відсутня клітинка потрапляла в набір як undefined і давала FAIL.
+        const xs = new Set(group.map(g => g.children[c]).filter(Boolean)
+          .map(e => Math.round(e.getBoundingClientRect().left)));
         if (xs.size > 1) ragged++; } });
     t('лівий край колонки однаковий у всіх рядках', ragged === 0, ragged);
 
