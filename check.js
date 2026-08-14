@@ -11,6 +11,10 @@
   const TXT = 'div,span,b,em,i,p,h1,h2';
   let fails = 0;
   document.querySelectorAll('.slide').forEach((s, i) => {
+    // elementFromPoint бачить лише вікно, тому слайд спершу треба прокрутити
+    // в кадр — інакше перевірка на перекритий текст мовчки пропускає все,
+    // крім першого слайда. Саме так вона й пропустила мій негативний тест.
+    s.scrollIntoView({block:"start"});
     const S = s.getBoundingClientRect(); const say = [];
     const t = (name, ok, val) => { if (!ok) fails++; say.push(`${ok ? 'PASS' : 'FAIL'}  ${name}: ${val}`); };
 
@@ -131,6 +135,31 @@
       .filter(e => { const v = e.getAttribute('src') || ''; return !/^(data:|https?:)/.test(v); });
     t('усі картинки вбудовані або за абсолютним посиланням', badSrc.length === 0,
       badSrc.length ? `${badSrc.length}: «${badSrc[0].getAttribute('src').slice(0, 34)}»` : 0);
+
+    // Пропорція картинки. Логотип я задав як 304×41.86 при файлі 2352×592 —
+    // тобто розтягнув удвічі по горизонталі, і знак «поплавило». На око це
+    // помітно, а жодна перевірка геометрії такого не бачить: бокс на місці.
+    const squashed = [...s.querySelectorAll('img')].filter(e => {
+      if (!e.naturalWidth || !e.naturalHeight) return false;
+      if (getComputedStyle(e).objectFit === 'cover') return false;   // фон ріжеться навмисно
+      const b = e.getBoundingClientRect(); if (!b.width || !b.height) return false;
+      return Math.abs((b.width / b.height) / (e.naturalWidth / e.naturalHeight) - 1) > 0.02;
+    });
+    t('картинки не розтягнуті', squashed.length === 0, squashed.length
+      ? `${squashed.length}: ${Math.round(squashed[0].getBoundingClientRect().width)}×${Math.round(squashed[0].getBoundingClientRect().height)} при файлі ${squashed[0].naturalWidth}×${squashed[0].naturalHeight}` : 0);
+
+    // Текст, накритий фоном. `.pic` і `.shade` абсолютні, а блок із заголовком
+    // був звичайним — позиціоновані сусіди малюються поверх, і на слайді
+    // просто немає тексту, хоча в коді він є. Питаємо браузер, хто зверху.
+    const covered = [...s.querySelectorAll(TXT)].filter(e => {
+      if (e.children.length || !e.textContent.trim()) return false;
+      const r = ink(e); const x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2;
+      if (r.right - r.left < 4 || r.bottom - r.top < 4) return false;
+      const top = document.elementFromPoint(x, y);
+      return top && top !== e && !e.contains(top) && !top.contains(e);
+    });
+    t('текст не накритий іншим елементом', covered.length === 0, covered.length
+      ? `${covered.length}: «${covered[0].textContent.trim().slice(0, 24)}»` : 0);
 
     // Bold заборонений, і саме тут я двічі проґавив своє. `h1` у браузера має
     // власне `font-weight:bold`, а успадкований 500 зі слайда його НЕ перебиває:
