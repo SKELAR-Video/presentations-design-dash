@@ -217,6 +217,49 @@
         `${info} = ${Math.round(100 * best)}%`);
     });
 
+    // Заголовок міг бути крупнішим. Перевірки ловлять переповнення, а простій —
+    // ні, тому «72px там, де влазить 118» проходило непоміченим. Рахуємо так:
+    // беремо намальовану ширину, перераховуємо на наступний крок шкали й
+    // дивимось, чи лишився б той самий набір рядків і чи є місце по вертикалі.
+    if (H && H.getBoundingClientRect().height) {
+      // Дві різні шкали, і плутати їх не можна: 157 — це теза на перебивці,
+      // а не заголовок слайда. Перша редакція перевірки саме через це вимагала
+      // від кожного заголовка 157px і дала 10 FAIL на власному еталоні.
+      const SCALE = H.classList.contains('st') ? [157, 118, 96, 72] : [118, 87, 72, 56, 44];
+      const cur = Math.round(parseFloat(getComputedStyle(H).fontSize));
+      const bigger = SCALE.filter(v => v > cur + 1).pop();   // найближчий більший
+      if (bigger) {
+        const r = document.createRange(); r.selectNodeContents(H);
+        const rects = [...r.getClientRects()];
+        const lines = Math.max(1, rects.length);
+        const wInk = Math.max(...rects.map(x => x.right)) - Math.min(...rects.map(x => x.left));
+        const box = H.getBoundingClientRect().width || (S.width - 200);
+        const k = bigger / cur;
+        // приблизна ширина того самого тексту на більшому кеглі
+        const need = wInk * k;
+        const fitsWidth = need <= box * lines * 0.9;   // із запасом: оцінка приблизна
+        // вертикаль: наскільки виріс би блок і чи не впреться в контент
+        const grow = (H.getBoundingClientRect().height) * (k - 1);
+        const below = [...s.querySelectorAll('.tl, .cols, .subs, .rails, .bul, .band, .right, .circ')]
+          .map(e => e.getBoundingClientRect().top - S.top)
+          .filter(v => v > 0).sort((a, b) => a - b)[0];
+        // Місця для росту стільки, скільки вільно ДО найближчого блока — і не
+        // більше, ніж лишилось до лінії 980. На слайдах із даними блоки стоять
+        // у потоці й ідуть униз разом із заголовком: там вільного місця немає
+        // взагалі, і вимагати більший кегль означає зламати таблицю. Перша
+        // редакція цього не рахувала й запропонувала 72px там, де панель
+        // одразу переповнилась.
+        let bottomFree = 980;
+        s.querySelectorAll('[class]').forEach(e => { const b = e.getBoundingClientRect();
+          if (b.height > 40 && b.width > 200) bottomFree = Math.min(bottomFree, 980 - (b.bottom - S.top)); });
+        const gap = below == null ? 980 - (H.getBoundingClientRect().bottom - S.top)
+                                  : below - (H.getBoundingClientRect().bottom - S.top);
+        const room = Math.max(0, Math.min(gap, bottomFree));
+        t('заголовок не дрібніший, ніж міг би бути', !(fitsWidth && grow + 40 < room),
+          fitsWidth && grow + 40 < room ? `${cur}px, а влазить ${bigger}px` : `${cur}px`);
+      }
+    }
+
     // Bold заборонений, і саме тут я двічі проґавив своє. `h1` у браузера має
     // власне `font-weight:bold`, а успадкований 500 зі слайда його НЕ перебиває:
     // спадкування слабше за правило UA на самому елементі. Тому кожен заголовок
