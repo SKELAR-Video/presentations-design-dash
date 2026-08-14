@@ -95,6 +95,20 @@
       t('логотип без скруглення', round.length === 0, round[0] || '0px');
     }
 
+    // Сітка одного блока мусить бути однакова в усіх його рядках. У живому деку
+    // адженда на 6 пунктів вийшла як 4+2: у другому рядку колонки вдвічі ширші,
+    // ліві краї розʼїхались, а довгі підписи у вужчих колонках вигнали слайд
+    // на 1119px. Правильно — ceil(N/2) і порожня клітинка в кінці.
+    const gridRows = new Map();
+    s.querySelectorAll('.tl-row, .cols, .subs, .rails, .band').forEach(g => {
+      const k = g.parentElement;
+      if (!gridRows.has(k)) gridRows.set(k, []);
+      gridRows.get(k).push(getComputedStyle(g).gridTemplateColumns.split(' ').length);
+    });
+    const uneven = [...gridRows.values()].filter(v => new Set(v).size > 1);
+    t('сітка однакова в усіх рядках блока', uneven.length === 0,
+      uneven.length ? `колонок по рядках: ${uneven[0].join(' / ')}` : 0);
+
     // Асети. Дві помилки, які я зробив сам і які доїхали в живий дек:
     // 1) знак був намальований clip-path-полігоном — тобто перемальований, хоч
     //    правило каже брати рівно той файл, що дано;
