@@ -139,11 +139,22 @@ deck.forEach(s => {
 
 /* ── 3 · асети за хешем ───────────────────────────────────────────────────── */
 console.log('\n══ 3 · асети ' + '─'.repeat(52));
-const known = {};
+// Крім хешу тримаємо розміри в пікселях: інструмент перекодовує картинки при
+// вбудовуванні, байти не збігаються, а зображення те саме. Порівняння лише за
+// хешем давало «невідомий файл» там, де все гаразд.
+const known = {}, byDim = {};
+const dims = buf => {                       // PNG IHDR: ширина й висота
+  if (buf.slice(1, 4).toString() === 'PNG') return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
+  for (let i = 2; i < buf.length - 9; i++)  // JPEG SOFn
+    if (buf[i] === 0xFF && [0xC0,0xC1,0xC2].includes(buf[i+1])) return [buf.readUInt16BE(i+7), buf.readUInt16BE(i+5)];
+  return null; };
 const walk = dir => fs.readdirSync(dir).forEach(n => {
   const p = path.join(dir, n);
   if (fs.statSync(p).isDirectory()) return walk(p);
-  if (/\.(png|jpe?g)$/i.test(n)) known[crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')] = path.relative(ROOT, p);
+  if (!/\.(png|jpe?g)$/i.test(n)) return;
+  const buf = fs.readFileSync(p), rel = path.relative(ROOT, p);
+  known[crypto.createHash('sha256').update(buf).digest('hex')] = rel;
+  const d = dims(buf); if (d) byDim[d.join('x')] = rel;
 });
 walk(path.join(ROOT, 'content'));
 const src = fs.readFileSync(target, 'utf8');
@@ -152,8 +163,10 @@ if (!uris.length) console.log('вбудованих картинок немає'
 uris.forEach(b64 => {
   const buf = Buffer.from(b64, 'base64');
   const h = crypto.createHash('sha256').update(buf).digest('hex');
-  console.log(known[h] ? `  ✓ ${known[h]} (${(buf.length / 1024).toFixed(1)} КБ)`
-                       : `  ✗ невідомий файл, ${(buf.length / 1024).toFixed(1)} КБ — знак перемальовано або взято не з репо`);
+  const d = dims(buf), key = d && d.join('x');
+  if (known[h]) console.log(`  ✓ ${known[h]} (${(buf.length / 1024).toFixed(1)} КБ)`);
+  else if (key && byDim[key]) console.log(`  ~ ${byDim[key]} — той самий розмір ${key}, інше кодування (${(buf.length / 1024).toFixed(1)} КБ)`);
+  else console.log(`  ✗ невідомий файл ${key || '?'}, ${(buf.length / 1024).toFixed(1)} КБ — перемальовано або взято не з репо`);
 });
 
 /* ── 4 · рендер кожного слайда ────────────────────────────────────────────── */
