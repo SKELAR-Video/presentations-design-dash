@@ -109,6 +109,36 @@
         .map(e => getComputedStyle(e).borderRadius)
         .filter(v => v && v !== '0px' && v !== '0%');
       t('логотип без скруглення', round.length === 0, round[0] || '0px');
+
+      // Версія знака мусить відповідати фону, і це не питання смаку: у файлі з
+      // червоною плашкою на червоному тлі плашка зникає, а білий знак на темному
+      // виглядає як сіра наліпка — саме це й було в живому деку на «Дякуємо».
+      // Міряється сам файл: кутовий піксель картинки. Червоний кут — версія з
+      // плашкою (темний фон), білий або прозорий — версія для червоного.
+      const im = L.querySelector('img') || (L.tagName === 'IMG' ? L : null);
+      if (im && im.naturalWidth) {
+        let corner = null;
+        try {
+          const cv = document.createElement('canvas');
+          cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+          const cx = cv.getContext('2d'); cx.drawImage(im, 0, 0);
+          corner = cx.getImageData(1, 1, 1, 1).data;
+        } catch (e) { /* картинка не з того ж джерела — вимір неможливий */ }
+        if (corner) {
+          const plated = corner[3] > 10 && corner[0] > 150 && corner[0] > corner[1] * 1.8;
+          const sb = getComputedStyle(s).backgroundColor.match(/\d+/g).map(Number);
+          const redBg = sb[0] > 150 && sb[0] > sb[1] * 1.8 && sb[0] > sb[2] * 1.8;
+          t('версія знака під фон', plated !== redBg,
+            `${plated ? 'з плашкою' : 'білий'} на ${redBg ? 'червоному' : 'темному'}`);
+        }
+      }
+
+      // Плашку несе файл. Намальована в коді підкладка — це друга плашка поверх
+      // тієї, що вже є у знаку, і на темному фоні вона читається як сіра наліпка.
+      const plate = [L, ...L.querySelectorAll('*')].filter(e => e.tagName !== 'IMG')
+        .map(e => getComputedStyle(e).backgroundColor)
+        .filter(v => v && v !== 'rgba(0, 0, 0, 0)' && v !== 'transparent');
+      t('під знаком нічого не підмальовано', plate.length === 0, plate[0] || 'чисто');
     }
 
     // Сітка одного блока мусить бути однакова в усіх його рядках. У живому деку
@@ -339,6 +369,134 @@
     t('маркери в рядках таблиці лише з легендою', dots.length === 0 || inLegend > 0,
       `${dots.length} у рядках / ${inLegend} у легенді`);
 
+    // Два ряди адженди — одна перенесена лінія: верхній ряд доходить до правого
+    // краю слайда, нижній починається від лівого. Лінія — псевдоелемент, тому
+    // querySelectorAll її не бачить; беремо used-значення left і width.
+    const twoRow = s.querySelector('.tl.two');
+    if (twoRow) {
+      const rows = [...twoRow.querySelectorAll('.tl-row')];
+      const edge = (row, side) => {
+        const b = row.getBoundingClientRect();
+        const cs = getComputedStyle(row, '::before');
+        const l = b.left + parseFloat(cs.left);
+        return side === 'right' ? l + parseFloat(cs.width) - S.right : l - S.left;
+      };
+      const first = Math.round(edge(rows[0], 'right'));
+      const last = Math.round(edge(rows[rows.length - 1], 'left'));
+      t('лінія адженди загортається на краях', Math.abs(first) <= 1 && Math.abs(last) <= 1,
+        `верхня до правого краю ${first}, нижня від лівого ${last}`);
+    }
+
+    // Заголовок і контент — два абсолюти, які нічого не знають одне про одного:
+    // .h1 стоїть на top:100, смуга — на своїй координаті, і третій рядок
+    // заголовка мовчки лягає на картки. Перекриття тут не ловилось нічим:
+    // перевірка на закритий текст шукає текст ПІД плашкою, а тут навпаки —
+    // заголовок малюється ЗВЕРХУ, він видимий, і formально все гаразд.
+    // Міряється намальоване проти краю блоків, із просвітом 24px.
+    const HEAD = s.querySelector('.h1, .st');
+    if (HEAD) {
+      const hb = ink(HEAD);
+      const bodies = [...s.querySelectorAll('.band,.tl,.sheet,.cols,.subs,.rails,.bul,.right,.kpi,.panel,.tw')]
+        .filter(e => !e.contains(HEAD) && !HEAD.contains(e));
+      let hit = 0, worstGap = Infinity;
+      bodies.forEach(e => {
+        const b = e.getBoundingClientRect();
+        const overlapX = Math.min(hb.right, b.right) - Math.max(hb.left, b.left) > 0;
+        if (!overlapX) return;
+        const gap = b.top - hb.bottom;
+        worstGap = Math.min(worstGap, gap);
+        if (gap < 24) hit++;
+      });
+      if (bodies.length) t('заголовок не налазить на контент', hit === 0,
+        `просвіт ${worstGap === Infinity ? '—' : Math.round(worstGap)}px (треба ≥24)`);
+    }
+
+    // Роздільник — одна лінія на всю панель, а не відрізок під кожною колонкою.
+    // Колонковий порядок (.tcol > .rows > i) давав розриви рівно по проміжках
+    // між колонками, і таблиця читалась як набір списків поруч. Міряється не
+    // розмітка, а намальоване: ширина лінії проти внутрішньої ширини панелі.
+    // Таблиця з `white-space:nowrap` не переповнюється й не обрізається — вона
+    // РОЗСУВАЄТСЯ: table-layout:auto не вміє віддати менше, ніж треба вмісту, і
+    // панель просто вилазить за свою смугу. Ні «текст не обрізаний», ні
+    // «нічого не переповнене» цього не бачать, бо overflow лишається visible.
+    // Через це шкала кегля була без верхньої межі: 38px «проходив» усюди.
+    s.querySelectorAll('.sheet').forEach(sh => {
+      const sb = sh.getBoundingClientRect();
+      // Міряти треба КЛІТИНКИ, а не бокс таблиці: як flex-елемент таблиця
+      // лишається шириною смуги, а вміст, який не влазить, просто виходить за
+      // її межі. Перша версія цієї перевірки дивилась на бокс і бачила «у
+      // межах» на слайді, де чотири з восьми колонок опинились за кадром.
+      const tabs = [...sh.querySelectorAll('.tbl')];
+      const far = tb => Math.max(...[...tb.querySelectorAll('.c, .h')]
+        .map(c => c.getBoundingClientRect().right), tb.getBoundingClientRect().right);
+      const wide = tabs.filter(tb => far(tb) > sb.right + 1);
+      const spill = Math.max(0, ...tabs.map(tb => Math.round(far(tb) - sb.right)));
+      t('таблиця не розсунула смугу', wide.length === 0,
+        wide.length ? `${wide.length} з ${tabs.length} вилазять, найбільше на ${spill}px` : 'у межах');
+    });
+
+    let gaps = 0, worstCut = 0;
+    s.querySelectorAll('.tbl').forEach(tb => {
+      const o = getComputedStyle(tb);
+      const b = tb.getBoundingClientRect();
+      const l0 = b.left + parseFloat(o.paddingLeft), r0 = b.right - parseFloat(o.paddingRight);
+      tb.querySelectorAll('.rows > .tr').forEach(row => {
+        const cells = [...row.children].map(c => c.getBoundingClientRect())
+          .sort((x, y) => x.left - y.left);
+        if (!cells.length) return;
+        // лінія малюється межею клітинки, тому вона рівно там, де клітинка:
+        // міряємо, чи клітинки вкривають усю внутрішню ширину без пропусків
+        let cut = Math.max(0, cells[0].left - l0) + Math.max(0, r0 - cells[cells.length - 1].right);
+        for (let k = 1; k < cells.length; k++) cut += Math.max(0, cells[k].left - cells[k - 1].right);
+        if (cut > 1) { gaps++; worstCut = Math.max(worstCut, Math.round(cut)); }
+      });
+    });
+    if (s.querySelector('.tbl')) t('лінія таблиці суцільна', gaps === 0,
+      gaps ? `${gaps} рядків із розривами, найбільший сумарно ${worstCut}px` : 'без розривів');
+
+    // Назва стовпця вирівнюється так само, як його клітинки. Розбіжність видно
+    // не одразу: сірий 18px ліворуч над числами праворуч виглядає як «шапка так
+    // і задумана», поки не покласти поруч колонку тексту.
+    let mis = 0, mex = '';
+    s.querySelectorAll('.tbl').forEach(tb => {
+      const hs = [...tb.querySelectorAll('.head > *')];
+      const trs = [...tb.querySelectorAll('.rows > .tr')];
+      hs.forEach((h, i) => {
+        const cells = trs.map(r => r.children[i]).filter(Boolean);
+        if (!cells.length) return;
+        const a = cells.map(c => getComputedStyle(c).textAlign);
+        if (!a.every(v => v === a[0])) return;      // мішана колонка — не судимо
+        const ha = getComputedStyle(h).textAlign;
+        if (ha !== a[0]) { mis++; if (!mex) mex = `«${h.textContent.trim()}» ${ha} проти ${a[0]}`; }
+      });
+    });
+    if (s.querySelector('.tbl')) t('шапка вирівняна як колонка', mis === 0, mis ? mex : 'збігається');
+
+    // Рідка таблиця має дихати вся, а не тільки між рядками. Коли рядків мало,
+    // крок росте автоматично (space-between), а кегль і поле лишаються від
+    // щільного випадку — виходить дрібний текст, прибитий до країв панелі,
+    // у якої всередині повітря. Обидві межі міряються від КРОКУ рядка:
+    //   поле по периметру ≈ крок / 3   (24 при кроці 75, 34 при кроці 99 —
+    //                                   рівно ті числа, що в макетах Figma);
+    //   крок / висота тексту ≤ 3.0     (та сама межа, що й для карток).
+    s.querySelectorAll('.tbl').forEach(tb => {
+      const trs = [...tb.querySelectorAll('.rows > .tr')];
+      if (trs.length < 2) return;
+      const tops = trs.map(r => r.getBoundingClientRect().top);
+      const pitch = (tops[tops.length - 1] - tops[0]) / (trs.length - 1);
+      let ih = 0;
+      trs[0].querySelectorAll('*').forEach(e => { if (e.children.length || !e.textContent.trim()) return;
+        const q = document.createRange(); q.selectNodeContents(e);
+        ih = Math.max(ih, q.getBoundingClientRect().height); });
+      const o = getComputedStyle(tb);
+      const pad = Math.min(parseFloat(o.paddingLeft), parseFloat(o.paddingRight),
+                           parseFloat(o.paddingTop), parseFloat(o.paddingBottom));
+      t('кегль рядка під крок таблиці', ih > 0 && pitch / ih <= 3.0,
+        `крок ${Math.round(pitch)} / текст ${Math.round(ih)} = ${(pitch / ih).toFixed(2)}×`);
+      t('поле панелі під крок таблиці', pad >= pitch / 3 - 2,
+        `поле ${Math.round(pad)} при кроці ${Math.round(pitch)} (треба ≥${Math.round(pitch / 3)})`);
+    });
+
     // Кегль — вимір із двома межами. «Не переповнено» я перевіряю завжди, а
     // «не недовикористано» забував: рядок висотою 114px із текстом 23px виглядає
     // акуратним, хоча половина картки — порожнеча, і текст міг бути крупнішим.
@@ -378,5 +536,36 @@
     console.log(`── слайд ${i + 1}\n   ` + say.join('\n   '));
   });
   spacer.remove();
+  /* ── ритм дека: перевірка не про слайд, а про послідовність ────────────────
+     Окремо кожен слайд може бути бездоганним, а дек однаково читається як
+     стіна тексту: двадцять два темні слайди підряд, і жодної візуальної
+     зупинки. Це видно тільки на всій послідовності, тому вимір тут, а не в
+     циклі. Зупинка — фото (обкладинка, пів екрана) або суцільний червоний. */
+  const slides = [...document.querySelectorAll('.slide')];
+  const catalogue = !!document.querySelector('.stage.catalogue');
+  const stop = s => {
+    if (s.querySelector('.pic, .cover, .bul .ph, [class*=photo]')) return true;
+    if (/url\(/.test(getComputedStyle(s).backgroundImage)) return true;
+    const bg = getComputedStyle(s).backgroundColor.match(/\d+/g).map(Number);
+    return bg[0] > 150 && bg[0] > bg[1] * 1.8 && bg[0] > bg[2] * 1.8;
+  };
+  const marks = slides.map(stop);
+  let run = 0, longest = 0;
+  marks.forEach(m => { if (m) run = 0; else { run++; longest = Math.max(longest, run); } });
+  const ends = marks.length > 1 && marks[0] && marks[marks.length - 1];
+  console.log(`\n── дек: ${marks.filter(Boolean).length} зупинок на ${marks.length} слайдів`
+    + `, найдовший відрізок без зупинки ${longest}`);
+  const say2 = (name, ok, val) => { if (!ok) fails++; console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}: ${val}`); };
+  if (catalogue) {
+    // Еталон — каталог типів, а не дек: порядок у ньому за типами, і дванадцять
+    // текстових типів поспіль тут законні. Виняток названий вголос і друкується,
+    // щоб його не можна було тихо застосувати до справжнього дека.
+    console.log('  каталог типів — ритм не міряється (у деку ці дві перевірки обовʼязкові)');
+  } else {
+    say2('не більше 4 слайдів без зупинки', longest <= 4, `найдовший відрізок ${longest}`);
+    say2('перший і останній слайди — зупинки', ends,
+      `${marks[0] ? 'так' : 'ні'} / ${marks[marks.length - 1] ? 'так' : 'ні'}`);
+  }
+
   console.log(fails === 0 ? '\n✅ усі перевірки зелені' : `\n❌ ${fails} FAIL — показувати ще рано`);
 })();

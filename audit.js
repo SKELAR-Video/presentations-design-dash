@@ -171,9 +171,12 @@ uris.forEach(b64 => {
 
 /* ── 4 · рендер кожного слайда ────────────────────────────────────────────── */
 console.log('\n══ 4 · рендер ' + '─'.repeat(51));
-const body = src.slice(src.indexOf('<body') >= 0 ? src.indexOf('<body') : 0);
-const head = src.slice(0, src.indexOf('<body') >= 0 ? src.indexOf('<body') : 0);
 const secs = src.split(/(?=<section )/).filter(x => x.trim().startsWith('<section'));
+// Голова — усе до першого слайда. Раніше межа шукалась по <body>, а у файлі
+// без цього тега indexOf давав -1, голова виходила порожня, і кожен PNG був
+// нестилізованим текстом. Дивитись на такий рендер було гірше, ніж не дивитись:
+// він виглядав як зламана верстка й відводив пошук убік.
+const head = src.slice(0, secs.length ? src.indexOf(secs[0]) : src.length);
 secs.forEach((sec, n) => {
   const one = path.join(outDir, `slide-${String(n + 1).padStart(2, '0')}.html`);
   fs.writeFileSync(one, head + '\n<style>.stage{zoom:1}.slide{margin:0}</style>\n<div class="stage">'
