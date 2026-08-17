@@ -355,6 +355,19 @@
     t('текст не пофарбований у червоне', redText.length === 0,
       redText.length ? `${redText.length}: «${redText[0].textContent.trim().slice(0, 24)}»` : 0);
 
+    // На червоному тлі дрібний текст — #FCCACA. Сірий #A2A6B1 там бруднить,
+    // біла прозорість (rgba(255,255,255,.85)) дає той самий сірий по-іншому.
+    // Заголовок і цифри лишаються білими: 1.6:1 у #FCCACA на червоному не
+    // читається, тому правило стосується саме дрібного тексту.
+    const sb0 = getComputedStyle(s).backgroundColor.match(/\d+/g).map(Number);
+    if (sb0[0] > 150 && sb0[0] > sb0[1] * 1.8 && sb0[0] > sb0[2] * 1.8) {
+      const small = [...s.querySelectorAll(TXT)].filter(e => !e.children.length
+        && e.textContent.trim() && parseFloat(getComputedStyle(e).fontSize) <= 56);
+      const bad = small.filter(e => getComputedStyle(e).color !== 'rgb(252, 202, 202)');
+      if (small.length) t('дрібний текст на червоному — #FCCACA', bad.length === 0,
+        bad.length ? `${bad.length} з ${small.length}: ${getComputedStyle(bad[0]).color}` : `${small.length} шт`);
+    }
+
     // Маркер-точка в рядку ТАБЛИЦІ читається як класифікація, і без легенди вона
     // бреше. Але в адженді й текстових блоках точка — вершина лінії, а не тип:
     // це офіційні патерни, і легенди їм не треба. Перша версія цієї перевірки
@@ -493,8 +506,12 @@
                            parseFloat(o.paddingTop), parseFloat(o.paddingBottom));
       t('кегль рядка під крок таблиці', ih > 0 && pitch / ih <= 3.0,
         `крок ${Math.round(pitch)} / текст ${Math.round(ih)} = ${(pitch / ih).toFixed(2)}×`);
-      t('поле панелі під крок таблиці', pad >= pitch / 3 - 2,
-        `поле ${Math.round(pad)} при кроці ${Math.round(pitch)} (треба ≥${Math.round(pitch / 3)})`);
+      // Межа двостороння. З односторонньою («не менше за третину кроку») поле
+      // могло стояти константою 34 на всіх таблицях і однаково давати PASS —
+      // саме так і було, а я звітував, що воно росте. Перевірка, яка не ловить
+      // константу там, де має бути функція, нічого не перевіряє.
+      t('поле панелі — третина кроку', Math.abs(pad - pitch / 3) <= 3,
+        `поле ${Math.round(pad)} при кроці ${Math.round(pitch)} (треба ${Math.round(pitch / 3)})`);
     });
 
     // Кегль — вимір із двома межами. «Не переповнено» я перевіряю завжди, а
