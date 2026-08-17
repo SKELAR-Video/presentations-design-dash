@@ -424,6 +424,60 @@
         `просвіт ${worstGap === Infinity ? '—' : Math.round(worstGap)}px (треба ≥24)`);
     }
 
+    // Жоден текст не перетинає жодного іншого. Це та перевірка, якої бракувало:
+    // я двічі лагодив налізання заголовка на смугу — спершу для таблиці, потім
+    // для бенто — і воно двічі поверталось у новому місці, бо кожна латка
+    // закривала одну пару елементів. Тут пар немає: міряються всі намальовані
+    // прямокутники тексту проти всіх. Дворядковий надзаголовок колонки, що ліг
+    // на свій же абзац, ловиться тим самим виміром, що й заголовок слайда.
+    const leaves = [...s.querySelectorAll(TXT)]
+      .filter(e => !e.children.length && e.textContent.trim())
+      .map(e => ({ e, r: ink(e) }))
+      .filter(o => o.r.right - o.r.left > 2 && o.r.bottom - o.r.top > 2);
+    let cross = 0, cex = '';
+    for (let a = 0; a < leaves.length; a++) for (let b = a + 1; b < leaves.length; b++) {
+      const A = leaves[a], B = leaves[b];
+      if (A.e.contains(B.e) || B.e.contains(A.e)) continue;
+      const ox = Math.min(A.r.right, B.r.right) - Math.max(A.r.left, B.r.left);
+      const oy = Math.min(A.r.bottom, B.r.bottom) - Math.max(A.r.top, B.r.top);
+      // 4px допуску: рядки одного абзацу торкаються виносними елементами
+      // (р, д, у) сусіднього рядка, і це не перекриття, а нормальний інтерліньяж.
+      if (ox > 4 && oy > 4) { cross++;
+        if (!cex) cex = `«${A.e.textContent.trim().slice(0,18)}» × «${B.e.textContent.trim().slice(0,18)}» на ${Math.round(ox)}×${Math.round(oy)}px`; }
+    }
+    t('жоден текст не перетинає інший', cross === 0, cross ? cex : `${leaves.length} блоків`);
+
+    // Вирівнювання в картці — тільки ліве. Чотири картки поруч читаються як
+    // одна сітка саме за спільною лівою вертикаллю; right-align робить ліві
+    // краї рваними, і замість сітки виходять чотири окремі блоки. Праве
+    // вирівнювання законне лише в колонці чисел таблиці, де воно про розряди.
+    // Табличний контекст поза перевіркою: там праве вирівнювання — це розряди
+    // чисел, і шапка колонки повторює його за окремим правилом. Перша версія
+    // цієї перевірки цього не знала й дала 4 FAIL на власному еталоні даних,
+    // де числа стоять праворуч цілком законно.
+    const TABULAR = '.tbl,.tw,.thead,.tbody,.r,.crow,.rows';
+    const numeric = v => /^[−–—+]?[\d\s.,%$€₴()–—-]*[\d—–]{1}[\d\s.,%$€₴()–—-]*$/.test(v);
+    const cardText = [...s.querySelectorAll(BOX + ',.nb-i,.tl-i,.bul-i')]
+      .flatMap(c => [...c.querySelectorAll(TXT)])
+      .filter(e => !e.children.length && e.textContent.trim()
+        && !e.closest(TABULAR) && !numeric(e.textContent.trim()));
+    const skew = cardText.filter(e => !['left', 'start'].includes(getComputedStyle(e).textAlign));
+    if (cardText.length) t('текст у картці вирівняний ліворуч', skew.length === 0,
+      skew.length ? `${skew.length} з ${cardText.length}: ${getComputedStyle(skew[0]).textAlign} «${skew[0].textContent.trim().slice(0,20)}»`
+                  : `${cardText.length} шт`);
+
+    // Панелі в одній смузі мусять мати однакову кількість рядків. Таблиця
+    // ділиться по КОЛОНКАХ (перша колонка-ключ повторюється), ніколи по
+    // категоріях: чотири панелі з 1, 2, 3 і 4 рядками дають чотири різні кроки,
+    // рядки не стають в один рівень, і смуга читається як зламана сітка.
+    // Саме так виглядав бюджет у живому деку — і це не глюк рендеру, а розкладка.
+    s.querySelectorAll('.sheet').forEach(sh => {
+      const counts = [...sh.querySelectorAll('.tbl')]
+        .map(tb => tb.querySelectorAll('.rows > .tr').length);
+      if (counts.length < 2) return;
+      t('у панелях смуги однаково рядків', new Set(counts).size === 1, counts.join(' / '));
+    });
+
     // Транспонування мовчить, коли колонки різної довжини. Дані приходять по
     // колонках, а рендер рядковий; якщо в одній колонці на значення менше, усі
     // наступні з'їжджають на рядок вище — і таблиця виглядає бездоганно,
@@ -611,6 +665,33 @@
     say2('не більше 4 слайдів без зупинки', longest <= 4, `найдовший відрізок ${longest}`);
     say2('перший і останній слайди — зупинки', ends,
       `${marks[0] ? 'так' : 'ні'} / ${marks[marks.length - 1] ? 'так' : 'ні'}`);
+
+    // Обкладинка — фото, а не суцільний червоний. Червоне тло законне як
+    // перебивка РОЗДІЛУ всередині дека; на першому слайді воно з'їдає єдину
+    // нагоду поставити образ, і дек починається з плаката. Коли на слайді лише
+    // заголовок — місця під фото більше нема куди дівати.
+    const photo = e => !!e.querySelector('.pic, .cover, [class*=photo], img[class*=bg]')
+      || /url\(/.test(getComputedStyle(e).backgroundImage);
+    const first = slides[0];
+    if (first) {
+      const bare = !first.querySelector('.band,.sheet,.cols,.subs,.rails,.bul,.right,.tl,.card');
+      if (bare) say2('обкладинка — фото, не червоний', photo(first),
+        photo(first) ? 'фото' : 'фото немає');
+    }
+
+    // Варіативність. Один тип, застосований до всього, що має стовпчики, дає
+    // дек, у якому кожен слайд схожий на попередній — окремо кожен правильний,
+    // разом читати нецікаво. Тип визначається розкладковим класом, а не змістом.
+    const LAY = ['band','sheet','cols','subs','rails','bul','right','tl','tt'];
+    const kind = e => LAY.find(c => e.querySelector('.' + c)) || '—';
+    const kinds = slides.map(kind);
+    let same = 1, worst = 1, at = '';
+    for (let k = 1; k < kinds.length; k++) {
+      if (kinds[k] === kinds[k - 1] && kinds[k] !== '—') { same++;
+        if (same > worst) { worst = same; at = `${kinds[k]} на слайдах ${k + 2 - same}–${k + 1}`; } }
+      else same = 1;
+    }
+    say2('не більше 2 слайдів підряд одного типу', worst <= 2, worst > 2 ? at : `найдовше ${worst}`);
   }
 
   console.log(fails === 0 ? '\n✅ усі перевірки зелені' : `\n❌ ${fails} FAIL — показувати ще рано`);
