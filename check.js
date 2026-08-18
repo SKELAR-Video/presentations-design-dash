@@ -244,6 +244,25 @@
         return b.width > 0 && b.height > 0; })                  // у display:none нулі
       .filter(e => { const b = e.getBoundingClientRect();
         return b.left < S.left + 99 || b.right > S.right - 99 || b.top < S.top + 99 || b.bottom > S.top + 981; });
+    // Бокс контейнера може стояти в межах, а намальований текст — уже ні: рядок
+    // вилазить за низ картки, картка за низ смуги, і слайд з overflow:hidden
+    // ріже його краєм. У живому деку так зникли хвости на двох слайдах — і
+    // бокси при цьому були на місці, тому попередня версія цієї перевірки
+    // (тільки по боксах) їх пропускала. Міряється намальоване, і 980 — не
+    // побажання, а інваріант: нижче нього змісту не буває.
+    const inkOut = [...s.querySelectorAll(TXT)]
+      .filter(e => !e.children.length && e.textContent.trim() && !e.closest('.note'))
+      .map(e => ({ e, r: ink(e) }))
+      .filter(o => o.r.right - o.r.left > 2 && o.r.bottom - o.r.top > 2)
+      // Верх і ліво міряються по БОКСУ (перевірка нижче), не по накресленню:
+      // при line-height:1 гліфи виступають над боксом на висоту акцентів —
+      // у заголовка 118px це 12px, і воно дало 3 хибні FAIL на власному
+      // еталоні. Втрата змісту буває тільки знизу й справа, там і межа.
+      .filter(o => o.r.bottom > S.top + 992 || o.r.right > S.right - 92);
+    t('текст не виходить за низ і правий край', inkOut.length === 0, inkOut.length
+      ? `${inkOut.length}, найгірший «${inkOut[0].e.textContent.trim().slice(0,20)}» низ ${Math.round(inkOut[0].r.bottom - S.top)}`
+      : 'усі');
+
     t('нічого не виходить за поле 100', outside.length === 0, outside.length
       ? `${outside.length}: .${String(outside[0].className).split(' ')[0]} до ${Math.round(outside[0].getBoundingClientRect().right - S.left)}` : 0);
 
@@ -478,6 +497,26 @@
       t('у панелях смуги однаково рядків', new Set(counts).size === 1, counts.join(' / '));
     });
 
+    // Заглушка замість фото — окремий дефект, і найпідліший: слайд виглядає
+    // «майже готовим», підпис «photo — cover, 1920×1080» читається як службова
+    // помітка, і дек здається на 95% зробленим. Фон — це ФАЙЛ із content/
+    // backgrounds, вбудований як data: URI. Намальований візерунок (діагональні
+    // смуги, сітка, градієнт-заповнювач) не є фото й не стає ним.
+    const decor = [s, ...s.querySelectorAll('*')].filter(e => {
+      const bi = getComputedStyle(e).backgroundImage;
+      if (!bi || bi === 'none') return false;
+      if (/^url\(/.test(bi)) return false;                 // справжня картинка
+      if (e.classList.contains('shade')) return false;      // затемнення під текстом
+      return /gradient/.test(bi);
+    });
+    t('немає намальованого візерунка замість фото', decor.length === 0,
+      decor.length ? `${decor.length}: ${getComputedStyle(decor[0]).backgroundImage.slice(0,42)}` : 'чисто');
+
+    const stub = [...s.querySelectorAll(TXT)].filter(e => !e.children.length
+      && /^(photo|image|фото|placeholder)\b|1920\s*[×x]\s*1080/i.test(e.textContent.trim()));
+    t('немає підпису-заглушки замість зображення', stub.length === 0,
+      stub.length ? `«${stub[0].textContent.trim().slice(0,32)}»` : 'чисто');
+
     // Транспонування мовчить, коли колонки різної довжини. Дані приходять по
     // колонках, а рендер рядковий; якщо в одній колонці на значення менше, усі
     // наступні з'їжджають на рядок вище — і таблиця виглядає бездоганно,
@@ -631,6 +670,26 @@
         if (e.children.length || !e.textContent.trim() || e.closest('.note')) return;
         fill = Math.max(fill, ink(e).bottom - S.top); });
       t('контент доходить до 980', Math.round(fill) >= 960, Math.round(fill));
+    }
+
+    // Шкала адженди при переносі — одна лінія, що загорнулась, а не дві окремі.
+    // Верхній ряд доводиться до ПРАВОГО краю слайда, нижній починається від
+    // лівого. Без цього два ряди читаються як дві незалежні шкали — саме так
+    // виглядав «Зміст» у живому деку: лінія від 01 до 04 і окремо від 05 до 06.
+    const rowsTl = [...s.querySelectorAll('.tl-row')];
+    if (rowsTl.length > 1) {
+      const px = v => Math.round(v);
+      const edge = (r, side) => {
+        const cs = getComputedStyle(r, '::before');
+        const b = r.getBoundingClientRect();
+        const left = b.left + parseFloat(cs.left || 0);
+        return side === 'r' ? left + parseFloat(cs.width || 0) : left;
+      };
+      const first = rowsTl[0], last = rowsTl[rowsTl.length - 1];
+      t('верхня шкала адженди доходить до правого краю',
+        Math.abs(edge(first, 'r') - S.right) <= 2, px(edge(first, 'r') - S.right));
+      t('нижня шкала адженди починається від лівого краю',
+        Math.abs(edge(last, 'l') - S.left) <= 2, px(edge(last, 'l') - S.left));
     }
 
     console.log(`── слайд ${i + 1}\n   ` + say.join('\n   '));
