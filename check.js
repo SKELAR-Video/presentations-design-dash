@@ -715,6 +715,18 @@
   console.log(`\n── дек: ${marks.filter(Boolean).length} зупинок на ${marks.length} слайдів`
     + `, найдовший відрізок без зупинки ${longest}`);
   const say2 = (name, ok, val) => { if (!ok) fails++; console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}: ${val}`); };
+
+  // Шрифт лежить у самому файлі, а не в системі глядача. Правило v29: зріз
+  // Inter вбудований як data: URI. Перевірка структурна, бо виміряти «той
+  // самий шрифт» зсередини не можна: на машині БЕЗ Inter фолбек змінює
+  // переноси, і всі виміри вище зроблені іншим деком, ніж побачить глядач.
+  // Пʼять дефектів еталона жили саме так — у рендері, якого «ні в кого немає».
+  const faces = [...document.styleSheets].flatMap(ss => { try { return [...ss.cssRules]; } catch { return []; } })
+    .filter(r => r instanceof CSSFontFaceRule)
+    .filter(r => /inter/i.test(r.style.getPropertyValue('font-family')));
+  const embedded = faces.some(r => /url\(\s*["']?data:/i.test(r.style.getPropertyValue('src')));
+  say2('шрифт Inter вбудований у файл як data: URI', embedded,
+    faces.length ? (embedded ? 'є' : '@font-face є, але src не data:') : '@font-face немає');
   if (catalogue) {
     // Еталон — каталог типів, а не дек: порядок у ньому за типами, і дванадцять
     // текстових типів поспіль тут законні. Виняток названий вголос і друкується,
