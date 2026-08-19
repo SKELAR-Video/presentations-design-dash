@@ -66,13 +66,16 @@
       .forEach(g => { const b = g.getBoundingClientRect();
         const key = `${[...s.querySelectorAll('*')].indexOf(g.parentElement)}|${Math.round(b.left)}|${Math.round(b.width)}`;
         if (!rows.has(key)) rows.set(key, []); rows.get(key).push(g); });
+    // Абсолютні діти (лінія адженди .tl-line) — не колонки сітки: вони поза
+    // потоком і не мають порівнюваного x.
+    const gridKids = g => [...g.children].filter(e => getComputedStyle(e).position !== 'absolute');
     [...rows.values()].forEach(group => { if (group.length < 2) return;
-      const n = group[0].children.length;
+      const n = gridKids(group[0]).length;
       for (let c = 0; c < n; c++) {
         // Порівнюємо тільки заповнені клітинки. Недозаповнений останній рядок —
         // це норма (адженда на 6 у сітці на 4), а не рваний край: раніше
         // відсутня клітинка потрапляла в набір як undefined і давала FAIL.
-        const xs = new Set(group.map(g => g.children[c]).filter(Boolean)
+        const xs = new Set(group.map(g => gridKids(g)[c]).filter(Boolean)
           .map(e => Math.round(e.getBoundingClientRect().left)));
         if (xs.size > 1) ragged++; } });
     t('лівий край колонки однаковий у всіх рядках', ragged === 0, ragged);
@@ -416,9 +419,11 @@
     if (twoRow) {
       const rows = [...twoRow.querySelectorAll('.tl-row')];
       const edge = (row, side) => {
-        const b = row.getBoundingClientRect();
+        const el = row.querySelector('.tl-line');   // лінія — елемент з v34; ::before — деки до неї
+        if (el) { const b = el.getBoundingClientRect(); return side === 'right' ? b.right - S.right : b.left - S.left; }
+        const rb = row.getBoundingClientRect();
         const cs = getComputedStyle(row, '::before');
-        const l = b.left + parseFloat(cs.left);
+        const l = rb.left + parseFloat(cs.left);
         return side === 'right' ? l + parseFloat(cs.width) - S.right : l - S.left;
       };
       const first = Math.round(edge(rows[0], 'right'));
@@ -688,6 +693,8 @@
     if (rowsTl.length > 1) {
       const px = v => Math.round(v);
       const edge = (r, side) => {
+        const el = r.querySelector('.tl-line');     // лінія — елемент з v34; ::before — деки до неї
+        if (el) { const b = el.getBoundingClientRect(); return side === 'r' ? b.right : b.left; }
         const cs = getComputedStyle(r, '::before');
         const b = r.getBoundingClientRect();
         const left = b.left + parseFloat(cs.left || 0);

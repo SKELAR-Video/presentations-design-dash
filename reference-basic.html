@@ -97,16 +97,16 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
 /* Лінія проходить рівно через центр кружечків, і це рахується з тих самих
    значень, що й самі кружечки: висота номера + відступ + половина кола.
    Раніше тут стояло магічне top:84 — лінія йшла на 20px вище центрів. */
-.tl-row::before{content:'';position:absolute;top:calc(57px + 22px + 27px - 1.5px);height:3px;background:var(--accent);left:27px;
+.tl-line{position:absolute;top:calc(57px + 22px + 27px - 1.5px);height:3px;background:var(--accent);left:27px;
  width:calc((var(--f) - 1) * var(--step))}
 /* Два ряди — це один перенесений рядок, а не дві окремі шкали. Тому верхній
    ряд доводиться до правого краю СЛАЙДА, нижній починається від лівого краю:
    лінія читається як така, що загорнулась. Це єдиний елемент, якому дозволено
    вийти за поле 100 — і саме тому він названий класом, а не зроблений типовим. */
-.tl-row.br::before{width:calc(100% + var(--pad) - 27px)}
-.tl-row.bl::before{left:calc(-1 * var(--pad));
+.tl-row.br .tl-line{width:calc(100% + var(--pad) - 27px)}
+.tl-row.bl .tl-line{left:calc(-1 * var(--pad));
  width:calc(var(--pad) + 27px + (var(--f) - 1) * var(--step))}
-.tl-row.bl.br::before{left:calc(-1 * var(--pad));width:calc(100% + 2 * var(--pad))}
+.tl-row.bl.br .tl-line{left:calc(-1 * var(--pad));width:calc(100% + 2 * var(--pad))}
 .tl-i{--nh:57px}                       /* висота рядка з номером: 48 × 1.18 */
 .tl-i .n{font-size:48px;color:var(--mut);line-height:1.18;height:var(--nh)}
 .tl-i .d{width:54px;height:54px;border-radius:50%;background:var(--accent);margin:22px 0 39px;position:relative;z-index:1}
@@ -283,7 +283,7 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
   <div class="logo"><img width="90" height="90" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
   <h1 class="h1">Адженда</h1>
   <div class="tl">
-    <div class="tl-row" style="--n:4;--f:4">
+    <div class="tl-row" style="--n:4;--f:4"><i class="tl-line"></i>
       <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків і навіщо вони потрібні</div></div>
       <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує в магазині</div></div>
       <div class="tl-i"><div class="n">03</div><div class="d"></div><div class="l">Магазин у цифрах</div></div>
@@ -297,13 +297,13 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
   <div class="logo"><img width="90" height="90" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
   <h1 class="h1">Адженда</h1>
   <div class="tl two">
-    <div class="tl-row br" style="--n:4;--f:4">
+    <div class="tl-row br" style="--n:4;--f:4"><i class="tl-line"></i>
       <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків</div></div>
       <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує</div></div>
       <div class="tl-i"><div class="n">03</div><div class="d"></div><div class="l">Магазин у цифрах</div></div>
       <div class="tl-i"><div class="n">04</div><div class="d"></div><div class="l">Найпопулярніші категорії</div></div>
     </div>
-    <div class="tl-row bl" style="--n:4;--f:4">
+    <div class="tl-row bl" style="--n:4;--f:4"><i class="tl-line"></i>
       <div class="tl-i"><div class="n">05</div><div class="d"></div><div class="l">Три категорії-лідери</div></div>
       <div class="tl-i"><div class="n">06</div><div class="d"></div><div class="l">Чому користувачі повертаються</div></div>
       <div class="tl-i"><div class="n">07</div><div class="d"></div><div class="l">Звички та утримання</div></div>
@@ -319,13 +319,13 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
   <div class="logo"><img width="90" height="90" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
   <h1 class="h1">Адженда</h1>
   <div class="tl two">
-    <div class="tl-row br" style="--n:4;--f:4">
+    <div class="tl-row br" style="--n:4;--f:4"><i class="tl-line"></i>
       <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків і навіщо вони потрібні</div></div>
       <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує в магазині</div></div>
       <div class="tl-i"><div class="n">03</div><div class="d"></div><div class="l">Магазин у цифрах</div></div>
       <div class="tl-i"><div class="n">04</div><div class="d"></div><div class="l">Найпопулярніші категорії застосунків</div></div>
     </div>
-    <div class="tl-row bl" style="--n:4;--f:2">
+    <div class="tl-row bl" style="--n:4;--f:2"><i class="tl-line"></i>
       <div class="tl-i"><div class="n">05</div><div class="d"></div><div class="l">Три категорії-лідери за доходом</div></div>
       <div class="tl-i"><div class="n">06</div><div class="d"></div><div class="l">Чому користувачі повертаються: звички та утримання</div></div>
     </div>
