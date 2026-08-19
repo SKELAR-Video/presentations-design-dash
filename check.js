@@ -169,10 +169,18 @@
         getComputedStyle(im).clipPath === 'none' && getComputedStyle(L).clipPath === 'none',
         getComputedStyle(im).clipPath);
     }
-    const badSrc = [...s.querySelectorAll('img')]
-      .filter(e => { const v = e.getAttribute('src') || ''; return !/^(data:|https?:)/.test(v); });
-    t('усі картинки вбудовані або за абсолютним посиланням', badSrc.length === 0,
-      badSrc.length ? `${badSrc.length}: «${badSrc[0].getAttribute('src').slice(0, 34)}»` : 0);
+    // Міряється факт, а не спосіб посилання: blob:, який бандл створює при
+    // завантаженні з байтів усередині файла, — законний і самодостатній
+    // (перевірка на «лише data:» тут давала 8 хибних FAIL на живому деку,
+    // що рендерився бездоганно). Дефект — картинка, яка НЕ завантажилась
+    // (naturalWidth 0: битий значок), або відносний шлях у сусідній файл.
+    const badImg = [...s.querySelectorAll('img')].filter(e => {
+      const v = e.getAttribute('src') || '';
+      if (/^https?:/.test(v)) return false;              // мережу міряє окрема перевірка
+      return !(e.complete && e.naturalWidth > 0);
+    });
+    t('кожна картинка завантажилась із самого файла', badImg.length === 0,
+      badImg.length ? `${badImg.length}: «${(badImg[0].getAttribute('src') || '').slice(0, 34)}»` : 0);
 
     // Пропорція картинки. Логотип я задав як 304×41.86 при файлі 2352×592 —
     // тобто розтягнув удвічі по горизонталі, і знак «поплавило». На око це

@@ -194,13 +194,32 @@ const secs = src.split(/(?=<section )/).filter(x => x.trim().startsWith('<sectio
 // нестилізованим текстом. Дивитись на такий рендер було гірше, ніж не дивитись:
 // він виглядав як зламана верстка й відводив пошук убік.
 const head = src.slice(0, secs.length ? src.indexOf(secs[0]) : src.length);
+const isBundle = fs.readFileSync(target, 'utf8').includes('__bundler');
 secs.forEach((sec, n) => {
+  const png = path.join(outDir, `slide-${String(n + 1).padStart(2, '0')}.png`);
   const one = path.join(outDir, `slide-${String(n + 1).padStart(2, '0')}.html`);
-  fs.writeFileSync(one, head + '\n<style>.stage{zoom:1}.slide{margin:0}</style>\n<div class="stage">'
-    + sec.replace(/<\/div>\s*<\/body>[\s\S]*$/, '').replace(/<\/div>\s*$/, '') + '</div>');
+  if (isBundle) {
+    // Бандл рендериться лише цілком: картинки він створює скриптом при
+    // завантаженні (blob: з байтів усередині файла), і у витягнутому шматку
+    // без скриптів вони биті — саме так PNG показали зниклий фон і знак,
+    // яких у живому рендері не бракувало. Тому знімається жива сторінка,
+    // де всі слайди, крім потрібного, сховані.
+    fs.writeFileSync(one, fs.readFileSync(target, 'utf8') +
+      `\n<script data-skelar-check>window.addEventListener('load', () => setTimeout(() => {
+        const show = [...document.querySelectorAll('.slide')]
+          .filter(s => !s.hasAttribute('data-dc-tpl') && !s.closest('[data-dc-tpl]'));
+        show.forEach((s, i) => { if (i === ${n}) {
+            Object.assign(s.style, { position: 'fixed', top: 0, left: 0, margin: 0, zoom: 1, visibility: 'visible', display: 'block' });
+            document.body.style.overflow = 'hidden';
+          } else s.style.display = 'none'; });
+      }, 800))</script>`);
+  } else {
+    fs.writeFileSync(one, head + '\n<style>.stage{zoom:1}.slide{margin:0}</style>\n<div class="stage">'
+      + sec.replace(/<\/div>\s*<\/body>[\s\S]*$/, '').replace(/<\/div>\s*$/, '') + '</div>');
+  }
   execFileSync(CHROME, ['--headless', '--disable-gpu', '--no-sandbox', '--allow-file-access-from-files',
-    '--hide-scrollbars', '--window-size=1920,1080', '--virtual-time-budget=5000',
-    '--screenshot=' + path.join(outDir, `slide-${String(n + 1).padStart(2, '0')}.png`), 'file://' + one],
+    '--hide-scrollbars', '--window-size=1920,1080', '--virtual-time-budget=8000',
+    '--screenshot=' + png, 'file://' + one],
     { stdio: 'ignore' });
 });
 console.log(`${secs.length} PNG у ${outDir}`);
