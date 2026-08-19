@@ -25,7 +25,7 @@ fs.mkdirSync(outDir, { recursive: true });
 
 /* ── зонд: усе, що можна виміряти зі сторінки, збирається одним проходом ──── */
 const PROBE = `
-<script>
+<script data-skelar-check>
 window.__probe = () => {
   // еталон лежить під .stage{zoom:0.62} для перегляду — без скидання зуму всі
   // координати приїжджають помножені на 0.62, і діф показує рівне зміщення 38px
@@ -72,10 +72,10 @@ function run(html, extra, waitMs = 4000) {
 }
 
 const collect = (html, waitMs) => JSON.parse(run(html,
-  `<script>setTimeout(()=>{document.title='@@'+JSON.stringify(window.__probe())+'@@'},${waitMs})</script>`, waitMs));
+  `<script data-skelar-check>setTimeout(()=>{document.title='@@'+JSON.stringify(window.__probe())+'@@'},${waitMs})</script>`, waitMs));
 
 const checkOf = (html, waitMs) => run(html,
-  `<script>setTimeout(()=>{const L=[],C=console.log;console.log=(...a)=>L.push(a.join(' '));`
+  `<script data-skelar-check>setTimeout(()=>{const L=[],C=console.log;console.log=(...a)=>L.push(a.join(' '));`
   + fs.readFileSync(path.join(ROOT, 'check.js'), 'utf8')
   + `console.log=C;document.title='@@'+L.join(String.fromCharCode(10))+'@@'},${waitMs})</script>`, waitMs);
 
