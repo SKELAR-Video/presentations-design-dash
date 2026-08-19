@@ -19,7 +19,7 @@
 # олімпіад, МАН» пройшло як цілісне: «олімпіад, МАН» знайшлось на слайді
 # «Цільові групи». Прив'язка до слайда — у беклозі.
 
-import re, sys, zipfile, zlib, unicodedata
+import re, sys, os, zipfile, zlib, unicodedata
 
 def norm(s):
     s = unicodedata.normalize('NFKD', s.lower().replace('ʼ', "'"))
@@ -54,9 +54,28 @@ def brief_items(path):
     return out
 
 # ── дек ──────────────────────────────────────────────────────────────────────
+def rendered_dom(path):
+    # Дек-бандл (DC) тримає текст у скриптах і розгортає його в розмітку при
+    # завантаженні. У сирому файлі змісту немає — «втрачено 129 із 129» на
+    # живому деку означало рівно це. Тому бандл спершу рендериться Хромом,
+    # і далі міряється DOM — той самий дек, який бачить глядач.
+    import subprocess, shutil
+    for c in [os.environ.get('CHROME'),
+              '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+              '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+              shutil.which('chromium'), shutil.which('google-chrome')]:
+        if c and os.path.exists(c):
+            return subprocess.run([c, '--headless', '--disable-gpu', '--no-sandbox',
+                '--allow-file-access-from-files', '--virtual-time-budget=8000',
+                '--dump-dom', 'file://' + os.path.abspath(path)],
+                capture_output=True, text=True).stdout
+    sys.exit('дек — бандл, текст у скриптах: потрібен Chrome для рендера (шлях у env CHROME)')
+
 def deck_text(path):
     if path.endswith('.html'):
         h = open(path, encoding='utf-8').read()
+        if '__bundler' in h:
+            h = rendered_dom(path)
         h = re.sub(r'<(script|style)\b.*?</\1>', ' ', h, flags=re.S)
         return re.sub(r'<[^>]+>', ' ', h)
     raw = open(path, 'rb').read()

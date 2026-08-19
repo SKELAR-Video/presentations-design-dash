@@ -157,7 +157,18 @@ const walk = dir => fs.readdirSync(dir).forEach(n => {
   const d = dims(buf); if (d) byDim[d.join('x')] = rel;
 });
 walk(path.join(ROOT, 'content'));
-const src = fs.readFileSync(target, 'utf8');
+let src = fs.readFileSync(target, 'utf8');
+if (src.includes('__bundler')) {
+  // Дек-бандл: у сирому файлі слайдів немає — їх збирає скрипт при
+  // завантаженні. Асети й витяг слайдів беруться з відрендереного DOM;
+  // скрипти зрізаються, щоб витягнутий слайд не запускав збирання вдруге
+  // (саме воно давало «Error unpacking» замість PNG).
+  src = execFileSync(CHROME, ['--headless', '--disable-gpu', '--no-sandbox',
+    '--allow-file-access-from-files', '--window-size=1920,1080',
+    '--virtual-time-budget=8000', '--dump-dom', 'file://' + path.resolve(target)],
+    { encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'ignore'] })
+    .replace(/<script[\s\S]*?<\/script>/g, '');
+}
 const uris = [...new Set([...src.matchAll(/data:image\/[a-z+]+;base64,([A-Za-z0-9+/=]+)/g)].map(m => m[1]))];
 if (!uris.length) console.log('вбудованих картинок немає');
 uris.forEach(b64 => {
@@ -171,7 +182,13 @@ uris.forEach(b64 => {
 
 /* ── 4 · рендер кожного слайда ────────────────────────────────────────────── */
 console.log('\n══ 4 · рендер ' + '─'.repeat(51));
-const secs = src.split(/(?=<section )/).filter(x => x.trim().startsWith('<section'));
+const seenSec = new Set();
+const secs = src.split(/(?=<section )/).filter(x => x.trim().startsWith('<section'))
+  // Бандл тримає кожен слайд двічі: дисплейна копія і авторська DC-секція
+  // з data-dc-tpl. Авторська не рендериться — 32 PNG замість 16 подвоюють
+  // перегляд очима без користі; дисплейна і є деком.
+  .filter(x => !/^<section[^>]*data-dc-tpl/.test(x.trim()))
+  .filter(x => { const k = x.trim(); if (seenSec.has(k)) return false; seenSec.add(k); return true; });
 // Голова — усе до першого слайда. Раніше межа шукалась по <body>, а у файлі
 // без цього тега indexOf давав -1, голова виходила порожня, і кожен PNG був
 // нестилізованим текстом. Дивитись на такий рендер було гірше, ніж не дивитись:
