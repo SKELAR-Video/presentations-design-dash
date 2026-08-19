@@ -430,6 +430,11 @@
       const last = Math.round(edge(rows[rows.length - 1], 'left'));
       t('лінія адженди загортається на краях', Math.abs(first) <= 1 && Math.abs(last) <= 1,
         `верхня до правого краю ${first}, нижня від лівого ${last}`);
+      // Товщина — з канонічного макета: точка 54, лінія 6 (~1:9). 3px жило в
+      // еталоні без жодного виміру і ніде не було записане свідомим відхиленням.
+      const lineEl = twoRow.querySelector('.tl-line');
+      if (lineEl) t('лінія адженди 6px', Math.abs(lineEl.getBoundingClientRect().height - 6) <= 1,
+        Math.round(lineEl.getBoundingClientRect().height) + 'px');
     }
 
     // Заголовок і контент — два абсолюти, які нічого не знають одне про одного:
