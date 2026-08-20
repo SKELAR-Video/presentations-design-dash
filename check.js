@@ -192,6 +192,22 @@
       const rd = parseFloat(getComputedStyle(e).borderRadius) || 0;
       return rd >= b.height / 2 - 1;
     });
+    // Бейджі сидять на низу картки (одна лінія в ряду), не плавають під текстом.
+    let looseBadge = 0;
+    s.querySelectorAll(BOX).forEach(c => {
+      const cb = c.getBoundingClientRect();
+      const badges = [...c.querySelectorAll(TXT)].filter(e => {
+        if (e.children.length || !e.textContent.trim()) return false;
+        const b = e.getBoundingClientRect();
+        const rd = parseFloat(getComputedStyle(e).borderRadius) || 0;
+        return rd >= 6 && rd < b.height / 2 - 1 && b.width > b.height * 1.2 && b.height < 60;
+      });
+      if (!badges.length) return;
+      const low = Math.max(...badges.map(e => e.getBoundingClientRect().bottom));
+      if (cb.bottom - low > 56) looseBadge++;
+    });
+    t('бейджі притиснуті до низу картки', looseBadge === 0, looseBadge);
+
     t('бейджі — радіус 10, не пігулки', pills.length === 0,
       pills.length ? `${pills.length}: «${pills[0].textContent.trim().slice(0, 20)}»` : 0);
 
