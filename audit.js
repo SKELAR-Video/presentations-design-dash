@@ -13,7 +13,12 @@
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { execFileSync } = require('child_process');
 
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME = process.env.CHROME || [
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  '/usr/bin/chromium', '/usr/bin/google-chrome',
+].find(p => fs.existsSync(p));
+if (!CHROME) { console.error('Chrome не знайдено: постав шлях у env CHROME'); process.exit(1); }
 const ROOT = __dirname;
 const args = process.argv.slice(2);
 const target = args[0];
