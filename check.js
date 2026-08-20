@@ -184,6 +184,17 @@
       if (/^https?:/.test(v)) return false;              // мережу міряє окрема перевірка
       return !(e.complete && e.naturalWidth > 0);
     });
+    // Бейдж-пігулка: широкий текстовий елемент із повністю круглими боками.
+    // Кружечки нумерації легальні — вони квадратні (ширина ≈ висота).
+    const pills = [...s.querySelectorAll(TXT)].filter(e => {
+      if (e.children.length || !e.textContent.trim()) return false;
+      const b = e.getBoundingClientRect(); if (b.width < b.height * 1.6) return false;
+      const rd = parseFloat(getComputedStyle(e).borderRadius) || 0;
+      return rd >= b.height / 2 - 1;
+    });
+    t('бейджі — радіус 10, не пігулки', pills.length === 0,
+      pills.length ? `${pills.length}: «${pills[0].textContent.trim().slice(0, 20)}»` : 0);
+
     t('кожна картинка завантажилась із самого файла', badImg.length === 0,
       badImg.length ? `${badImg.length}: «${(badImg[0].getAttribute('src') || '').slice(0, 34)}»` : 0);
 
