@@ -45,7 +45,14 @@ def brief_items(path):
                 t = re.sub(r'\s+', ' ', t).strip()
                 if len(norm(t)) >= 12: out.append((f'слайд {i}', t))
         return out
-    txt = open(path, encoding='utf-8').read()
+    if path.endswith('.pdf'):
+        # ТЗ буває і PDF: текст дістає той самий екстрактор, що читає
+        # PDF-деки (стріми + ToUnicode нижче в deck_text), а далі — те саме
+        # членування на речення, що й для текстового ТЗ. Сканований PDF без
+        # текстового шару так не прочитається — це межа, не дефект.
+        txt = deck_text(path)
+    else:
+        txt = open(path, encoding='utf-8').read()
     out = []
     for line in txt.split('\n'):
         for part in re.split(r'(?<=[.;])\s+', line):
