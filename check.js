@@ -408,7 +408,10 @@
     // обійшли. Тому вимір: жоден листовий вузол з текстом не має червоного
     // кольору. Фон червоним бути може — біла цифра на червоному колі законна.
     const red = c => { const m = c.match(/\d+/g); if (!m) return false;
-      const [r, g, b] = m.map(Number); return r > 150 && r > g * 1.8 && r > b * 1.8; };
+      // Поріг 120, не 150: найтемніший червоний палітри #950100 — це 149,1,0,
+      // і на 150 він проходив як «не червоний». Темний червоний у тексті —
+      // такий самий дефект, як яскравий.
+      const [r, g, b] = m.map(Number); return r > 120 && r > g * 1.8 && r > b * 1.8; };
     const redText = [...s.querySelectorAll(TXT)]
       .filter(e => !e.children.length && e.textContent.trim() && red(getComputedStyle(e).color));
     t('текст не пофарбований у червоне', redText.length === 0,
