@@ -513,6 +513,38 @@
     }
     t('жоден текст не перетинає інший', cross === 0, cross ? cex : `${leaves.length} блоків`);
 
+    // Гострий кут на радіусному краю. Плашка-шапка, притулена до верху панелі,
+    // мусить повторити її радіус на верхніх кутах; гострий лишається лише там,
+    // де плашка триває всередину. У живому деку панель мала скруглення 30, а
+    // шапка в ній — гострий верх, і це читалось як недомальований елемент.
+    // Правила цього не забороняли: радіус поверхні стояв трьома різними
+    // числами в трьох місцях, тому будь-яке значення формально проходило.
+    const rad = (e, c) => parseFloat(getComputedStyle(e)['border' + c + 'Radius']) || 0;
+    const CORNERS = [['TopLeft','top','left'], ['TopRight','top','right'],
+                     ['BottomLeft','bottom','left'], ['BottomRight','bottom','right']];
+    let sharp = 0, sex = '';
+    [...s.querySelectorAll('*')].forEach(e => {
+      const o = getComputedStyle(e);
+      if (!o.backgroundColor || o.backgroundColor === 'rgba(0, 0, 0, 0)') return;
+      const par = e.parentElement; if (!par || par === s) return;
+      const po = getComputedStyle(par);
+      if (!po.backgroundColor || po.backgroundColor === 'rgba(0, 0, 0, 0)') return;
+      // Батько з overflow:hidden сам обрізає дитину по своєму радіусу — кут
+      // виходить скругленим без жодного border-radius на плашці, і вимагати
+      // його там означало б давати FAIL на візуально правильному слайді.
+      if (po.overflow !== 'visible' || po.overflowX !== 'visible') return;
+      const b = e.getBoundingClientRect(), pb = par.getBoundingClientRect();
+      if (b.width < 40 || b.height < 20) return;
+      CORNERS.forEach(([c, v, h]) => {
+        const pr = rad(par, c); if (pr < 4) return;
+        const touchV = Math.abs(b[v] - pb[v]) <= 1, touchH = Math.abs(b[h] - pb[h]) <= 1;
+        if (!(touchV && touchH)) return;                  // кут не на краю поверхні
+        if (rad(e, c) < pr - 1) { sharp++;
+          if (!sex) sex = `${c}: ${Math.round(rad(e, c))} проти ${Math.round(pr)} у батька`; }
+      });
+    });
+    t('кут плашки на краю повторює радіус поверхні', sharp === 0, sharp ? sex : 'збігається');
+
     // Вирівнювання в картці — тільки ліве. Чотири картки поруч читаються як
     // одна сітка саме за спільною лівою вертикаллю; right-align робить ліві
     // краї рваними, і замість сітки виходять чотири окремі блоки. Праве
