@@ -630,6 +630,37 @@
     });
     t('підпис стоїть при числі', far === 0, far ? farEx : 'при числі');
 
+    // Цифра проти тіла — дві межі, бо цифра буває двох різних речей.
+    // ПІДЛОГА, скрізь: цифра не менша за тіло. У живому деку номери 1…8 на
+    // бенто вийшли ДРІБНІШИМИ за текст — це хиба в будь-якому типі.
+    // ПОКАЗНИК, лише в картці: ≥2.5× тіла. Значення з еталона (98/38 = 2.58),
+    // не вигадане; ×3 забракувало б сам макет Bento Bottom Number.
+    // Маркери поза цією межею: в адженді цифра — мітка над точкою таймлайна
+    // (48/36 = 1.33), у Half screen — цифра в кружечку (38/48 = 0.79). Там
+    // вона законно не домінує, тому діє лише підлога.
+    let numBad = 0, numEx = '';
+    s.querySelectorAll('[class*=card],.nb-i,.tl-i,.bul-i,[class*=kpi]').forEach(c => {
+      const leaves = [...c.querySelectorAll(TXT)]
+        .filter(e => !e.children.length && e.textContent.trim());
+      let num = null, body = null;
+      leaves.forEach(e => {
+        const txt = e.textContent.trim(), fs = parseFloat(getComputedStyle(e).fontSize);
+        // Цифра в кружечку підігнана під кружечок, а не під текст: у Half
+        // screen це 38 у колі 68 при тексті 48 — макет із Figma. Тому кругла
+        // цифра поза обома межами; підлога на ній дала хибний FAIL.
+        const round = [e, e.parentElement].some(x => x &&
+          parseFloat(getComputedStyle(x).borderRadius) >= x.getBoundingClientRect().width * 0.4);
+        if (/^[0-9]{1,3}$/.test(txt) && !round) { if (!num || fs > num.fs) num = { txt, fs }; }
+        else if (txt.length > 20) { if (!body || fs > body.fs) body = { txt, fs }; }
+      });
+      if (!num || !body) return;
+      const isCard = /card|nb-i/.test(c.className);
+      const need = isCard ? body.fs * 2.5 : body.fs;
+      if (num.fs < need - 0.5) { numBad++;
+        if (!numEx) numEx = `«${num.txt}» ${Math.round(num.fs)}px проти тіла ${Math.round(body.fs)}px = ×${(num.fs / body.fs).toFixed(2)} (треба ×${isCard ? '2.5' : '1'})`; }
+    });
+    t('цифра не дрібніша за тіло', numBad === 0, numBad ? numEx : 'ок');
+
     // Проміжки на слайді — одне число. Правило «проміжок між картками 30»
     // існувало текстом, але без виміру: у живому деку вертикальна щілина між
     // бенто вийшла помітно ширшою за горизонтальну, і формально ніщо не
