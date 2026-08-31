@@ -557,6 +557,29 @@
     });
     t('немає двох меж підряд під плашкою', dbl === 0, dbl ? dex : 'чисто');
 
+    // Смуга під плашкою, яка НЕ є елементом. Шапка й тіло — два окремі блоки
+    // з проміжком, і в проміжку світиться фон панелі: він світліший за тіло,
+    // тому читається як товста лінія на всю ширину. Відрізнити від законного
+    // роздільника просто: роздільник тонкий і з відступами від краю, а ця
+    // смуга — від краю до краю. Міряти нічого: елемента немає, є ЩІЛИНА.
+    let slit = 0, sl = '';
+    plates.forEach(({ e: p, b: pb }) => {
+      plates.forEach(({ e: q, b: qb }) => {
+        if (p === q || p.contains(q) || q.contains(p)) return;
+        const gap = qb.top - pb.bottom;
+        if (gap <= 0 || gap > 12) return;
+        const ov = Math.min(pb.right, qb.right) - Math.max(pb.left, qb.left);
+        if (ov < pb.width * 0.85) return;                 // блоки одна під одною
+        const par = p.parentElement; if (!par) return;
+        const pc = getComputedStyle(par).backgroundColor;
+        const a = getComputedStyle(p).backgroundColor, b2 = getComputedStyle(q).backgroundColor;
+        if (pc === 'rgba(0, 0, 0, 0)' || pc === a || pc === b2) return;
+        slit++;
+        if (!sl) sl = `щілина ${Math.round(gap)}px між «${p.textContent.trim().slice(0,16)}» і тілом, у ній фон панелі`;
+      });
+    });
+    t('шапка і тіло без щілини', slit === 0, slit ? sl : 'без щілини');
+
     // Гострий кут на радіусному краю. Плашка-шапка, притулена до верху панелі,
     // мусить повторити її радіус на верхніх кутах; гострий лишається лише там,
     // де плашка триває всередину. У живому деку панель мала скруглення 30, а
