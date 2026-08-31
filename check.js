@@ -580,6 +580,68 @@
     });
     t('шапка і тіло без щілини', slit === 0, slit ? sl : 'без щілини');
 
+    // Проміжки на слайді — одне число. Правило «проміжок між картками 30»
+    // існувало текстом, але без виміру: у живому деку вертикальна щілина між
+    // бенто вийшла помітно ширшою за горизонтальну, і формально ніщо не
+    // порушувалось. Міряються ВСІ проміжки між сусідніми залитими блоками,
+    // незалежно від контейнера: різні контейнери — найчастіша причина, бо
+    // gap у смузі й gap у колонці задаються окремо й розходяться.
+    const blocks = [...s.querySelectorAll('*')].filter(e => {
+      const o = getComputedStyle(e);
+      if (!o.backgroundColor || o.backgroundColor === 'rgba(0, 0, 0, 0)') return false;
+      const b = e.getBoundingClientRect();
+      return b.width > 120 && b.height > 60;
+    });
+    const gapSet = new Set();
+    blocks.forEach(a => blocks.forEach(c => {
+      if (a === c || a.contains(c) || c.contains(a)) return;
+      if (a.parentElement !== c.parentElement && !(a.parentElement.parentElement === c.parentElement.parentElement)) return;
+      const ab = a.getBoundingClientRect(), cb = c.getBoundingClientRect();
+      const vOv = Math.min(ab.right, cb.right) - Math.max(ab.left, cb.left);
+      const hOv = Math.min(ab.bottom, cb.bottom) - Math.max(ab.top, cb.top);
+      if (vOv > Math.min(ab.width, cb.width) * 0.6) {           // одна під одною
+        const g = cb.top - ab.bottom; if (g > 0 && g < 200) gapSet.add(Math.round(g));
+      } else if (hOv > Math.min(ab.height, cb.height) * 0.6) {  // пліч-о-пліч
+        const g = cb.left - ab.right; if (g > 0 && g < 200) gapSet.add(Math.round(g));
+      }
+    }));
+    const gl = [...gapSet].sort((x, y) => x - y);
+    // Допуск 2px: округлення flex дає 29/30/31 на тому самому проміжку.
+    const spread = gl.length ? gl[gl.length - 1] - gl[0] : 0;
+    if (gl.length) t('проміжки на слайді однакові', spread <= 2, gl.join(' / '));
+
+    // Текст у картці притиснутий до верху. Правило було текстом без виміру.
+    // Міряється МЕХАНІЗМ, а не пікселі: центрування задається властивістю
+    // (`justify-content:center` у колонці, `align-items:center` у рядку,
+    // `margin:auto`), і її видно однозначно. Два піксельні підходи до цього
+    // я вже спробував, і обидва дали хибні FAIL на власному еталоні: перший
+    // ловив симетрію — вона законна в заповненій картці; другий міряв від
+    // `padding-top` картки — а він нуль там, де відступ дає внутрішня обгортка.
+    const CENTERISH = ['center', 'space-around', 'space-evenly', 'flex-end', 'end'];
+    let mid = 0, midEx = '';
+    s.querySelectorAll(BOX).forEach(c => {
+      if (c.getBoundingClientRect().height < 120) return;
+      [c, ...c.querySelectorAll('*')].forEach(e => {
+        const o = getComputedStyle(e);
+        const flex = o.display === 'flex' || o.display === 'inline-flex';
+        const grid = o.display === 'grid';
+        if (!flex && !grid) return;
+        if (![...e.children].some(k => k.textContent.trim())) return;
+        const col = flex && /column/.test(o.flexDirection);
+        const prop = grid ? 'alignContent' : (col ? 'justifyContent' : 'alignItems');
+        if (!CENTERISH.includes(o[prop])) return;
+        // Рядковий flex із align-items:center вирівнює по вертикалі лише тоді,
+        // коли контейнер вищий за вміст: у рядку заввишки з текст це не дефект.
+        if (prop === 'alignItems' && e.getBoundingClientRect().height < 90) return;
+        // Блоки тверджень навмисно повітряні — той самий виняток, що вже стоїть
+        // у перевірці на порожнечу рядка; окремого правила тут не заводиться.
+        if (e.closest('.says')) return;
+        mid++;
+        if (!midEx) midEx = `${prop}:${o[prop]} у «${e.textContent.trim().slice(0, 18)}»`;
+      });
+    });
+    t('текст притиснутий до верху картки', mid === 0, mid ? midEx : 'до верху');
+
     // Гострий кут на радіусному краю. Плашка-шапка, притулена до верху панелі,
     // мусить повторити її радіус на верхніх кутах; гострий лишається лише там,
     // де плашка триває всередину. У живому деку панель мала скруглення 30, а
