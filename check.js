@@ -597,6 +597,39 @@
         Math.round(S.right - b.right));
     });
 
+    // Підпис належить числу, тому стоїть майже впритул: в еталоні просвіт
+    // між накресленням числа і накресленням підпису — 10px. У правилах цього
+    // числа не було взагалі (був лише кегль підпису), тому дек узяв довільний,
+    // і підпис відпав від числа на півкартки. Вільне місце має йти ВНИЗ картки,
+    // а не між числом і його підписом — інакше вони читаються як два окремі
+    // повідомлення. Шукається парою «велике число + дрібний підпис під ним»,
+    // без опори на класи: у чужому компоненті вони називаються інакше.
+    let far = 0, farEx = '';
+    s.querySelectorAll(BOX).forEach(c => {
+      const leaves = [...c.querySelectorAll(TXT)]
+        .filter(e => !e.children.length && e.textContent.trim())
+        .map(e => ({ e, r: ink(e), fs: parseFloat(getComputedStyle(e).fontSize) }))
+        .filter(o => o.r.bottom - o.r.top > 2);
+      leaves.forEach(a => {
+        if (a.fs < 44) return;
+        leaves.forEach(b => {
+          if (b === a || b.fs > a.fs / 1.5) return;
+          // Підпис — це наступний сусід числа й короткий рядок. Без цих двох
+          // умов у пару потрапляли маркер «01» у Bento Number (під ним не
+          // підпис, а речення) і виноска під KPI — обидва дали хибний FAIL
+          // на власних еталонах, і обидва просвіти там законні.
+          if (a.e.nextElementSibling !== b.e) return;
+          if (b.e.textContent.trim().length > 24) return;
+          const ov = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
+          if (ov < Math.min(a.r.right - a.r.left, b.r.right - b.r.left) * 0.4) return;
+          const g = b.r.top - a.r.bottom;
+          if (g > 16 && g < 200) { far++;
+            if (!farEx) farEx = `${Math.round(g)}px між «${a.e.textContent.trim().slice(0,8)}» і «${b.e.textContent.trim().slice(0,12)}» (треба ≤16)`; }
+        });
+      });
+    });
+    t('підпис стоїть при числі', far === 0, far ? farEx : 'при числі');
+
     // Проміжки на слайді — одне число. Правило «проміжок між картками 30»
     // існувало текстом, але без виміру: у живому деку вертикальна щілина між
     // бенто вийшла помітно ширшою за горизонтальну, і формально ніщо не
