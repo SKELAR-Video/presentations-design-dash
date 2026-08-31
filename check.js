@@ -523,7 +523,11 @@
       const o = getComputedStyle(e);
       if (parseFloat(o.borderTopWidth) >= 1 && o.borderTopStyle !== 'none') return true;
       const b = e.getBoundingClientRect();
-      return b.height <= 3 && b.width > 40 && o.backgroundColor !== 'rgba(0, 0, 0, 0)';
+      // До 10px, не до 3: «зайва лінія» під плашкою може бути не хвилинним
+      // бордюром, а залитою смугою в кілька пікселів — на око це та сама
+      // зайва межа, і механізм для правила не має значення. Ширина ≥60%
+      // плашки відсікає прогрес-бари: вони теж низькі, але вужчі.
+      return b.height <= 10 && b.width > 40 && o.backgroundColor !== 'rgba(0, 0, 0, 0)';
     };
     const filled = e => {
       const c = getComputedStyle(e).backgroundColor;
@@ -545,7 +549,7 @@
       plates.forEach(({ e: p, b: pb }) => {
         if (p.contains(e) || e.contains(p)) return;
         const ov = Math.min(b.right, pb.right) - Math.max(b.left, pb.left);
-        if (ov < b.width * 0.5) return;
+        if (ov < b.width * 0.5 || b.width < pb.width * 0.6) return;
         const gap = b.top - pb.bottom;
         if (gap >= -1 && gap <= 3) { dbl++;
           if (!dex) dex = `лінія під «${p.textContent.trim().slice(0,18)}», просвіт ${Math.round(gap)}px`; }
