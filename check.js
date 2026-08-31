@@ -513,6 +513,46 @@
     }
     t('жоден текст не перетинає інший', cross === 0, cross ? cex : `${leaves.length} блоків`);
 
+    // Дві межі підряд. Плашка-шапка вже відділена від тіла власною заливкою;
+    // якщо перший пункт списку теж отримує border-top, під плашкою малюється
+    // ще й 1px — виходить подвійна межа, і вона читається як зайва лінія
+    // невідомого призначення. Причина завжди одна: роздільник поставили на
+    // КОЖЕН елемент, а не між елементами. В еталоні це знято п'ятьма
+    // `:first-child{border-top:none}`, але в тексті правил цього не було.
+    const lineish = e => {
+      const o = getComputedStyle(e);
+      if (parseFloat(o.borderTopWidth) >= 1 && o.borderTopStyle !== 'none') return true;
+      const b = e.getBoundingClientRect();
+      return b.height <= 3 && b.width > 40 && o.backgroundColor !== 'rgba(0, 0, 0, 0)';
+    };
+    const filled = e => {
+      const c = getComputedStyle(e).backgroundColor;
+      if (!c || c === 'rgba(0, 0, 0, 0)') return false;
+      const pc = e.parentElement ? getComputedStyle(e.parentElement).backgroundColor : '';
+      return c !== pc;
+    };
+    // Шукається геометрією, а не по сусідству в DOM: плашка й перший рядок
+    // часто лежать у різних обгортках (.thead поруч із .tbody, а лінія — на
+    // .r усередині), і previousElementSibling їх не бачить. Перша версія цієї
+    // перевірки саме тому не впала на негативному тесті.
+    const plates = [...s.querySelectorAll('*')].filter(filled)
+      .map(e => ({ e, b: e.getBoundingClientRect() }))
+      .filter(o => o.b.width > 60 && o.b.height > 20);
+    let dbl = 0, dex = '';
+    [...s.querySelectorAll('*')].forEach(e => {
+      if (!lineish(e)) return;
+      const b = e.getBoundingClientRect();
+      plates.forEach(({ e: p, b: pb }) => {
+        if (p.contains(e) || e.contains(p)) return;
+        const ov = Math.min(b.right, pb.right) - Math.max(b.left, pb.left);
+        if (ov < b.width * 0.5) return;
+        const gap = b.top - pb.bottom;
+        if (gap >= -1 && gap <= 3) { dbl++;
+          if (!dex) dex = `лінія під «${p.textContent.trim().slice(0,18)}», просвіт ${Math.round(gap)}px`; }
+      });
+    });
+    t('немає двох меж підряд під плашкою', dbl === 0, dbl ? dex : 'чисто');
+
     // Гострий кут на радіусному краю. Плашка-шапка, притулена до верху панелі,
     // мусить повторити її радіус на верхніх кутах; гострий лишається лише там,
     // де плашка триває всередину. У живому деку панель мала скруглення 30, а
