@@ -67,18 +67,45 @@ def journal():
             decks.append((name, m.group(1), m.group(2), team))
     return decks
 
+def counter():
+    # Живий лічильник: Клод Дизайн читає правила через
+    # presentations-design.vercel.app/api/rules/..., кожне читання логується,
+    # а /api/deck-stats віддає зведення. Це єдиний облік без дій людини (v66+).
+    import json, ssl, urllib.request
+    ca = '/root/.ccr/ca-bundle.crt'
+    ctx = ssl.create_default_context(cafile=ca) if os.path.exists(ca) else None
+    try:
+        r = urllib.request.urlopen(
+            'https://presentations-design.vercel.app/api/deck-stats',
+            timeout=25, context=ctx)
+        return json.loads(r.read().decode())
+    except Exception as e:
+        return {'error': str(e)}
+
 def main():
     roots = sys.argv[1:] or ['decks']
+    live = counter()
     decks = journal() + scan([r for r in roots if os.path.isdir(r)])
     by_team = Counter(t for _, _, _, t in decks)
     by_ver = Counter(v for _, v, _, _ in decks)
 
     out = io.StringIO()
     out.write('# Статистика генерації деків\n\n')
-    out.write(f'Оновлено: {date.today().strftime("%d.%m.%Y")} · всього деків: {len(decks)}\n\n')
-    out.write('Рахується рядок-слід `SKELAR deck · правила vNN · дата · тіма`:\n')
-    out.write('записи в `JOURNAL.md` плюс файли в `decks/`. Файл без рядка — дек,\n')
-    out.write('зібраний до v51 або не за правилами.\n\n')
+    out.write(f'Оновлено: {date.today().strftime("%d.%m.%Y")}\n\n')
+    out.write('## Лічильник (автоматично, з v66)\n\n')
+    out.write('Кожна генерація рахується в момент, коли Клод Дизайн читає правила\n')
+    out.write('через лічильник; зведення віддає `/api/deck-stats`.\n\n')
+    if 'error' in live:
+        out.write(f'Лічильник недоступний: `{live["error"]}` — цифри нижче лише ручні.\n\n')
+    else:
+        out.write(f'**Деків: {live.get("деків", 0)}** · синків: {live.get("іншіПодії", {}).get("sync", 0)}\n\n')
+        for title, key in [('По тімах', 'поТімах'), ('По версіях правил', 'поВерсіях'), ('По місяцях', 'поМісяцях')]:
+            out.write(f'### {title}\n\n| | Деків |\n|---|---|\n')
+            for k, v in sorted(live.get(key, {}).items(), key=lambda x: -x[1]):
+                out.write(f'| {k} | {v} |\n')
+            out.write('\n')
+    out.write(f'## Ручний облік (до v66) · деків: {len(decks)}\n\n')
+    out.write('Рядок-слід у файлах `decks/` і записах `JOURNAL.md`.\n\n')
     out.write('## По тімах\n\n| Тіма | Деків |\n|---|---|\n')
     for team, n in by_team.most_common():
         out.write(f'| {team} | {n} |\n')
