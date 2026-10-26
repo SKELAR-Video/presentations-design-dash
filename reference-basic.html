@@ -32,6 +32,8 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
  --w:1720px;        /* ширина контенту: 1920 − 2×100 */
  --r:30px;          /* радіус картки */
  --cp:40px;         /* внутрішній відступ картки */
+ --line:#414653;    /* роздільник рядків таблиці — те саме значення, що в reference.html;
+                       без визначення var(--line) межа рядка мовчки не малювалась зовсім */
 }
 /* Слайд — flex-колонка з полем 100: заголовок стоїть У ПОТОЦІ, і контент іде
    за ним, скільки б рядків той не зайняв. Це заміна механізму --cmin/--h1l:
@@ -298,7 +300,7 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
   <div class="logo"><img width="90" height="90" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
   <h1 class="h1">Адженда</h1>
   <div class="tl">
-    <div class="tl-row" style="--n:4;--f:4"><i class="tl-line"></i>
+    <div class="tl-row br" style="--n:4;--f:4"><i class="tl-line"></i>
       <div class="tl-i"><div class="n">01</div><div class="d"></div><div class="l">Що таке категорії застосунків і навіщо вони потрібні</div></div>
       <div class="tl-i"><div class="n">02</div><div class="d"></div><div class="l">Скільки категорій існує в магазині</div></div>
       <div class="tl-i"><div class="n">03</div><div class="d"></div><div class="l">Магазин у цифрах</div></div>
@@ -439,9 +441,9 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
   <div class="logo"><img width="90" height="90" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAApdJREFUeAHt3c1tE1EUQOHriCbSRpwynJoCNcVtmDJwFdEQs4EVGGGRzJnvk7zy9mh09X70dq+P+2Ug4m4gRNCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSfk0/NHu8DS7/X7qltNpluPLrJmgr3GJ+XCYTVh50EYOUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNiqBJETQpgiZF0KQImhRBkyJoUgRNyqavYF19V/DhYViHbd8p3NJdwY0wcpAiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJqU9gH/w9Pv/7+/H1rSQd89Pw/bYuQgRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSVn9eeirn5VgE9Z/wN+zEvzCyEHKth8NWrvzt5nT17mV5XSatRP0ii1vMS9fPg8/GTlIETQpgiZF0KQImhRBkyJoUgRNio2V93DZkTuf518VdvZuTdDvYDke334vw+0ZOUgRNCmCJkXQpAiaFEGTImhSrEP/pR9ryG6JfFi+0KQImhRBkyJoUgRNyupXOS5HKHfz/ziy+bHtXh/3y0CEkYMUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYImRdCkCJoUQZMiaFIETYqgSRE0KYIm5TtCeTPeKhwq8gAAAABJRU5ErkJggg==" alt="SKELAR"></div>
   <h1 class="h1 tight">Поговоримо про «бізнеси на століття»?</h1>
   <div class="rails" style="--n:3">
-    <div class="rail-i"><div class="rail"><s></s></div><div class="t">Чому користувачі повертаються: звички та утримання</div></div>
-    <div class="rail-i"><div class="rail"><s></s></div><div class="t">Що тримає категорію в топі роками, а не один сезон</div></div>
-    <div class="rail-i"><div class="rail"><s></s></div><div class="t">Де закінчується зростання і починається утримання</div></div>
+    <div class="rail-i"><div class="rail"><i></i><s></s></div><div class="t">Чому користувачі повертаються: звички та утримання</div></div>
+    <div class="rail-i"><div class="rail"><i></i><s></s></div><div class="t">Що тримає категорію в топі роками, а не один сезон</div></div>
+    <div class="rail-i"><div class="rail"><i></i><s></s></div><div class="t">Де закінчується зростання і починається утримання</div></div>
   </div>
 </section>
 
