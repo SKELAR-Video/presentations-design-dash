@@ -487,6 +487,31 @@
       t('лінія колонки доходить до 980', worstRail >= 978, worstRail);
     }
 
+    // Останній рядок заголовка не закінчується самотнім коротким словом:
+    // «Q3» або «(2/2)», що впало на окремий рядок, читається як огризок.
+    // Ліки — нерозривний пробіл між останніми двома словами. Міряється
+    // накреслене: слова розкладаються по рядках їхніми прямокутниками.
+    s.querySelectorAll('.h1, .st').forEach(H => {
+      const tn = [...H.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim());
+      const lines = new Map();
+      tn.forEach(node => {
+        const text = node.textContent; let m;
+        const re = /\S+/g;
+        while ((m = re.exec(text))) {
+          const r = document.createRange();
+          r.setStart(node, m.index); r.setEnd(node, m.index + m[0].length);
+          const b = r.getBoundingClientRect(); if (!b.width) continue;
+          const key = Math.round(b.top / 10);
+          if (!lines.has(key)) lines.set(key, []);
+          lines.get(key).push(m[0]);
+        }
+      });
+      if (lines.size < 2) return;
+      const last = [...lines.entries()].sort((a, b) => a[0] - b[0]).pop()[1];
+      t('заголовок не закінчується самотнім коротким словом',
+        !(last.length === 1 && last[0].length <= 6), last.join(' ').slice(0, 24));
+    });
+
     // Заголовок і контент — два абсолюти, які нічого не знають одне про одного:
     // .h1 стоїть на top:100, смуга — на своїй координаті, і третій рядок
     // заголовка мовчки лягає на картки. Перекриття тут не ловилось нічим:

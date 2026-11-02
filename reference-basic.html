@@ -56,6 +56,9 @@ html{background:#05070E} body{margin:0} .stage{zoom:0.62}
    Кути гострі: жодного border-radius. Вага на всіх заголовках — явно 500,
    бо успадкована не перебиває браузерний bold на h1. */
 .logo{position:absolute;z-index:3;right:100px;top:100px;width:90px;height:90px}
+/* Поруч із заголовком знак центрується по його ПЕРШОМУ рядку: центр знака =
+   центр рядка (рішення власника бренду, 02.11.2026). Без заголовка — топ 100. */
+.h1~.logo{top:calc(100px + (var(--h1,118px) - 90px)/2)}
 .logo.bl{right:auto;left:100px;top:auto;bottom:100px}
 .logo img{display:block;width:90px;height:90px}
 
