@@ -487,6 +487,19 @@
       t('лінія колонки доходить до 980', worstRail >= 978, worstRail);
     }
 
+    // Знак поруч із заголовком центрується по його першому рядку:
+    // top = 100 + (кегль − 90)/2. Правило v76 прожило мертвим у самому
+    // еталоні (селектор не спрацьовував), і ніщо його не міряло — тепер міряє.
+    const H1 = s.querySelector('.h1');
+    const LG = s.querySelector('.logo:not(.bl)');
+    if (H1 && LG && getComputedStyle(LG).display !== 'none') {
+      const fs = parseFloat(getComputedStyle(H1).fontSize);
+      const want = Math.max(100, 100 + (fs - 90) / 2);   // не вище поля 100
+      const got = LG.getBoundingClientRect().top - S.top;
+      t('знак по центру першого рядка заголовка', Math.abs(got - want) <= 2,
+        `${Math.round(got)} (треба ${Math.round(want)})`);
+    }
+
     // Останній рядок заголовка не закінчується самотнім коротким словом:
     // «Q3» або «(2/2)», що впало на окремий рядок, читається як огризок.
     // Ліки — нерозривний пробіл між останніми двома словами. Міряється
